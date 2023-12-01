@@ -1,0 +1,8 @@
+.vs/**
+x64/**
+Debug/**
+Release/**
+*/Release/**
+*/Debug/**
+*/x64/**
+all_my_passwords.txt
