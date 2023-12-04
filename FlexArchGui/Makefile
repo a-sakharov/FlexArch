@@ -6,7 +6,7 @@ WX_CONFIG := wx-config
 WX_CXXFLAGS := $(shell $(WX_CONFIG) --cxxflags)
 WX_LIBS := $(shell $(WX_CONFIG) --libs)
 
-CXXFLAGS := -I..
+CXXFLAGS := -I.. -DFLEXARCH_INTERNAL
 
 OBJECTS := FlexArchGui.o
 
@@ -17,4 +17,4 @@ $(OBJECTS): %.o: %.cpp
 	$(CXX) -c -o $@ $(WX_CXXFLAGS) $(CXXFLAGS) $<
 
 clean:
-	rm -f *.o FlexArchGui
+	rm -f *.o FlexArchGui $(OBJECTS)

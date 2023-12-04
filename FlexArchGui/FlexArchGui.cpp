@@ -60,12 +60,10 @@ bool MyApp::OnInit()
     return true;
 }
 
-MyFrame::MyFrame()
-    : wxFrame(NULL, wxID_ANY, "Hello World")
+MyFrame::MyFrame(): wxFrame(NULL, wxID_ANY, "Hello World")
 {
     wxMenu* menuFile = new wxMenu;
-    menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
-        "Help string shown in status bar for this menu item");
+    menuFile->Append(ID_Hello, "&Hello...\tCtrl-H", "Help string shown in status bar for this menu item");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
 
@@ -77,6 +75,10 @@ MyFrame::MyFrame()
     menuBar->Append(menuHelp, "&Help");
 
     SetMenuBar(menuBar);
+
+    wxPanel* panel = new wxPanel(this);
+
+    wxButton* button = new wxButton(panel, wxID_ANY, "Hello", wxPoint(100, 100), wxSize(100, 100));
 
     CreateStatusBar();
     SetStatusText("Welcome to wxWidgets!");
@@ -93,8 +95,7 @@ void MyFrame::OnExit(wxCommandEvent& event)
 
 void MyFrame::OnAbout(wxCommandEvent& event)
 {
-    wxMessageBox("This is a wxWidgets Hello World example",
-        "About Hello World", wxOK | wxICON_INFORMATION);
+    wxMessageBox("This is a wxWidgets Hello World example", "About Hello World", wxOK | wxICON_INFORMATION);
 }
 
 void MyFrame::OnHello(wxCommandEvent& event)
