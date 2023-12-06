@@ -5,6 +5,9 @@
 #include <stdbool.h>
 #ifdef _WIN32
 #include <Windows.h>
+#else
+#include <linux/limits.h>
+#define MAX_PATH PATH_MAX
 #endif
 
 struct PluginFunctionsCollection_t
@@ -25,9 +28,12 @@ struct PluginFunctionsCollection_t
     Archive_RegisterStatusCallback  Archive_RegisterStatusCallback;
     Archive_GetEntryInfo            Archive_GetEntryInfo;
 
+    char module_name[MAX_PATH];
+
 #ifdef _WIN32
     HMODULE module;
-    wchar_t module_name[MAX_PATH];
+#else
+    void *module;    
 #endif
 };
 typedef struct PluginFunctionsCollection_t PluginFunctionsCollection;

@@ -1,8 +1,9 @@
 .PHONY: clean
 
-CFLAGS := -I.. -DFLEXARCH_INTERNAL
-
-OBJECTS := FlexArchCl.o
+CFLAGS := -I.. -DFLEXARCH_INTERNAL -g -O0
+LIBS := -ldl
+OBJECTS := FlexArchCl.o FlexArchInternals.o
+LDFLAGS := 
 
 FlexArchCl: $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(LIBS)

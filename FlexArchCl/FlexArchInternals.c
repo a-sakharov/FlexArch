@@ -1,5 +1,13 @@
 #include "FlexArchInternals.h"
+#include <stdlib.h>
+#include <string.h>
 
+
+PluginFunctionsCollection* LoadedPlugins;
+size_t LoadedPluginsCount;
+
+
+#ifdef _WIN32
 #define LOADADDR(x) plugin->x = (x)GetProcAddress(plugin->module, #x); if(!plugin->x) return false;
 static bool FlexArch_LoadPlugin(PluginFunctionsCollection* plugin, wchar_t* path)
 {
@@ -24,14 +32,11 @@ static bool FlexArch_LoadPlugin(PluginFunctionsCollection* plugin, wchar_t* path
     LOADADDR(Archive_RegisterStatusCallback);
     LOADADDR(Archive_GetEntryInfo);
 
-    wcscpy_s(plugin->module_name, sizeof(plugin->module_name) / sizeof(*plugin->module_name), path);
+    WideCharToMultiByte(CP_UTF8, 0, path, -1, plugin->module_name, sizeof(plugin->module_name), NULL, NULL);
 
     return true;
 }
 #undef LOADADDR
-
-PluginFunctionsCollection* LoadedPlugins;
-size_t LoadedPluginsCount;
 
 void FlexArch_CollectPlugins()
 {
@@ -78,9 +83,113 @@ void FlexArch_CollectPlugins()
 
     FindClose(find_handle);
 }
+#else
+#include <dirent.h>
+#include <dlfcn.h>
+#include <stdio.h>
+
+#define LOADADDR(x) plugin->x = (x)dlsym(plugin->module, #x); if(!plugin->x) {dlclose(plugin->module); return false;}
+static bool FlexArch_LoadPlugin(PluginFunctionsCollection* plugin, char* path)
+{
+    char tempname[PATH_MAX];
+    snprintf(tempname, sizeof(tempname), "./%s", path);
+
+    plugin->module = dlopen(tempname, RTLD_LAZY);
+    if (!plugin->module)
+    {
+        return false;
+    }
+
+    LOADADDR(Plugin_GetName);
+    LOADADDR(Plugin_Description);
+    LOADADDR(Plugin_ErrorCodeDescription);
+    LOADADDR(Archive_Open);
+    LOADADDR(Archive_Create);
+    LOADADDR(Archive_Save);
+    LOADADDR(Archive_Close);
+    LOADADDR(Archive_AddFileLocal);
+    LOADADDR(Archive_RemoveEntry);
+    LOADADDR(Archive_CreateDirectory);
+    LOADADDR(Archive_EnumerateEntries);
+    LOADADDR(Archive_ExtractFiles);
+    LOADADDR(Archive_RegisterStatusCallback);
+    LOADADDR(Archive_GetEntryInfo);
+
+    strncpy(plugin->module_name, path, sizeof(plugin->module_name));
+}
+#undef LOADADDR
+
+static int filter_plugins(const struct dirent *diritem)
+{
+    if(diritem->d_type != DT_REG)
+    {
+        return 0;
+    }
+
+    if(strstr(diritem->d_name, "FlexArchPlugin_") != diritem->d_name)
+    {
+        return 0;
+    }
+
+    if(!strstr(diritem->d_name + strlen(diritem->d_name) - 3, ".so"))
+    {
+        return 0;
+    }
+
+    return 1;
+}
+
+void FlexArch_CollectPlugins()
+{
+    struct dirent **namelist;
+    int n;
+    PluginFunctionsCollection plugin;
+    bool enumerating_ok = true;
+    void* temp;
+
+    n = scandir(".", &namelist, filter_plugins, alphasort);
+    if (n == -1) 
+    {
+        return;
+    }
+
+    while (n--) 
+    {
+        if(enumerating_ok && FlexArch_LoadPlugin(&plugin, namelist[n]->d_name))
+        {
+            LoadedPluginsCount++;
+            temp = realloc(LoadedPlugins, sizeof(PluginFunctionsCollection) * LoadedPluginsCount);
+            if (!temp)
+            {
+                free(LoadedPlugins);
+                LoadedPlugins = NULL;
+                LoadedPluginsCount = 0;
+
+                enumerating_ok = false;
+            }
+            else
+            {
+                LoadedPlugins = temp;
+                memcpy(&LoadedPlugins[LoadedPluginsCount - 1], &plugin, sizeof(PluginFunctionsCollection));
+            }
+        }
+        free(namelist[n]);
+    }
+    free(namelist);
+}
+#endif
 
 void FlexArch_FreePlugins()
 {
+    size_t i;
+
+    for(i=0; i<LoadedPluginsCount; ++i)
+    {
+#ifndef _WIN32
+        dlclose(LoadedPlugins[i].module);
+#endif
+    }
+
     free(LoadedPlugins);
 
     LoadedPlugins = NULL;

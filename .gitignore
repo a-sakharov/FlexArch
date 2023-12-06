@@ -6,3 +6,5 @@ Release/**
 */Debug/**
 */x64/**
 all_my_passwords.txt
+*.o
+*.so

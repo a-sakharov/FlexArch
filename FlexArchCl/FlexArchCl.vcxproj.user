@@ -4,6 +4,7 @@
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommandArguments>-a D:\share\software-bundle\ILSpy_binaries_5.0.1.5145.zip --list</LocalDebuggerCommandArguments>
+    <LocalDebuggerEnvironment>PATH=%PATH%;D:\libs\bin</LocalDebuggerEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
@@ -14,6 +15,7 @@
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommandArguments>-a D:\share\software-bundle\ILSpy_binaries_5.0.1.5145.zip --list</LocalDebuggerCommandArguments>
+    <LocalDebuggerEnvironment>PATH=%PATH%;D:\libs\bin64</LocalDebuggerEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>

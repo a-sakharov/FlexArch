@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
-#include <Windows.h>
 #include <getopt.h>
+#include <ctype.h>
 #include <FlexArch/plugin.h>
 #include "FlexArchInternals.h"
 
@@ -35,7 +35,7 @@ void ListPlugins()
     printf("Total %zd plugins loaded:\n", LoadedPluginsCount);
     for (i = 0; i < LoadedPluginsCount; ++i)
     {
-        printf("%zd: %ls: %s\n", i+1, LoadedPlugins[i].module_name, LoadedPlugins[i].Plugin_GetName());
+        printf("%zd: %s: %s\n", i+1, LoadedPlugins[i].module_name, LoadedPlugins[i].Plugin_GetName());
     }
 }
 
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
 
     while (1)
     {
-        c = getopt_long(argc, argv, "vpa:ldc", long_options, NULL);
+        c = getopt_long(argc, argv, "vphf:lda", long_options, NULL);
         if (c == -1)
         {
             break;
@@ -130,7 +130,7 @@ int main(int argc, char** argv)
 
     if (!archive_path)
     {
-        printf("Archive not specified!");
+        printf("Archive not specified!\n");
         return -1;
     }
 
@@ -138,7 +138,7 @@ int main(int argc, char** argv)
 
     if (!FlexArch_TryOpenArchive(&a, archive_path))
     {
-        printf("Could not open archive %s", archive_path);
+        printf("Could not open archive %s\n", archive_path);
         return -1;
     }
 

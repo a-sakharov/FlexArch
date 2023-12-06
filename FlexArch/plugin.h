@@ -36,8 +36,10 @@
 #include <time.h>
 
 #ifdef __GNUC__
-#define FLEXARCH_CALL_TYPE //__attribute__((__cdecl__))
-#define FLEXARCH_EXPORT __attribute__((dllexport))
+#define FLEXARCH_CALL_TYPE 
+//__attribute__((__cdecl__))
+#define FLEXARCH_EXPORT 
+//__attribute__((dllexport))
 #elif _MSC_VER
 #define FLEXARCH_CALL_TYPE _cdecl
 #define FLEXARCH_EXPORT __declspec(dllexport)
