@@ -98,7 +98,7 @@ int main(int argc, char** argv)
             PrintHelp();
             break;
 
-            case 'a':
+            case 'f':
             archive_path = optarg;
             break;
 
@@ -110,7 +110,7 @@ int main(int argc, char** argv)
             extract = true;
             break;
 
-            case 'c':
+            case 'a':
             add = true;
             break;
 
