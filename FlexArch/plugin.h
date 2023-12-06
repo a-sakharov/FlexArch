@@ -44,10 +44,10 @@
 #endif
 
 #ifdef FLEXARCH_INTERNAL
-#define FLEXARCH_PLUGIN_API(x)          typedef uint32_t (FLEXARCH_CALL_TYPE *x)
+#define FLEXARCH_PLUGIN_API(x)          typedef FlexArchResult (FLEXARCH_CALL_TYPE *x)
 #define FLEXARCH_PLUGIN_API_STRING(x)   typedef const char * (FLEXARCH_CALL_TYPE *x)
 #else
-#define FLEXARCH_PLUGIN_API(x)          FLEXARCH_EXPORT uint32_t FLEXARCH_CALL_TYPE x
+#define FLEXARCH_PLUGIN_API(x)          FLEXARCH_EXPORT FlexArchResult FLEXARCH_CALL_TYPE x
 #define FLEXARCH_PLUGIN_API_STRING(x)   FLEXARCH_EXPORT const char * FLEXARCH_CALL_TYPE x
 #endif
 
@@ -89,6 +89,7 @@ enum FA_PREDESINED_ERRORS
     //codes up to 0x7FFFFFFF reserved, from 0x80000000 to 0xFFFFFFFF are implementation defined (see rule 5)
     
 };
+#define FA_PREDEFINED_ERRORS_MAX 0x7FFFFFFF
 
 enum FA_METADATA
 {
@@ -97,6 +98,12 @@ enum FA_METADATA
 
     //codes up to 0x7FFFFFFF reserved, from 0x80000000 to 0xFFFFFFFF are implementation defined (see rule 5)
 };
+
+
+/**
+*
+*/
+typedef uint32_t FlexArchResult;
 
 /**
 * Passed to all archive functions to be used as memory pointer, as pointer-size value holder or something else (implementation-specific for plugins)
@@ -152,7 +159,7 @@ FLEXARCH_PLUGIN_API_STRING(Plugin_Description)();
 * \param[in] reserved do not use, set to 0
 * \return error description
 */
-FLEXARCH_PLUGIN_API_STRING(Plugin_ErrorCodeDescription)(uint32_t error_code, uint16_t reserved);
+FLEXARCH_PLUGIN_API_STRING(Plugin_ErrorCodeDescription)(FlexArchResult error_code, uint16_t reserved);
 
 /**
 * \brief Opens existing archive

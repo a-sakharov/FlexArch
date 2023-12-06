@@ -139,11 +139,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="common_code.c" />
+    <ClCompile Include="FlexArchInternals.c" />
     <ClCompile Include="FlexArchCl.c" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="common_code.h" />
+    <None Include="FlexArchInternals.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3,12 +3,13 @@
 #include <Windows.h>
 #include <getopt.h>
 #include <FlexArch/plugin.h>
-#include "common_code.h"
+#include "FlexArchInternals.h"
 
 
 void PrintHelp();
 void PrintVersion();
 void ListPlugins();
+void archive_enumerate(archive_handle archive, archive_entry* entry, uint8_t last_item);
 
 void PrintHelp()
 {
@@ -38,9 +39,25 @@ void ListPlugins()
     }
 }
 
+void ListArchiveFiles(opened_archive *archive)
+{
+    archive->used_plugin.Archive_EnumerateEntries(archive->handle, archive_enumerate);
+}
+
+void archive_enumerate(archive_handle archive, archive_entry* entry, uint8_t last_item)
+{
+    printf("%s\n", entry->super_name ? entry->super_name : entry->name);
+}
+
+void ReportError(char *situation, FlexArchResult code, PluginFunctionsCollection *plugin)
+{
+    printf("While performing %s gor error %ud (%s)", situation, code,
+        code <= FA_PREDEFINED_ERRORS_MAX ? FlexArch_GetErrorDescription(code) : plugin->Plugin_ErrorCodeDescription(code, 0));
+}
+
 int main(int argc, char** argv)
 {
-    CollectPlugins();
+    FlexArch_CollectPlugins();
 
     int c;
     static struct option long_options[] = 
@@ -54,7 +71,7 @@ int main(int argc, char** argv)
         { "add",     no_argument,       0, 'a' },
         { 0,         0,                 0,  0 }
     };
-    char *archive = NULL;
+    char *archive_path = NULL;
     bool list = false;
     bool extract = false;
     bool add = false;
@@ -82,7 +99,7 @@ int main(int argc, char** argv)
             break;
 
             case 'a':
-            archive = optarg;
+            archive_path = optarg;
             break;
 
             case 'l':
@@ -111,13 +128,39 @@ int main(int argc, char** argv)
         }
     }
 
-    if (!archive)
+    if (!archive_path)
     {
         printf("Archive not specified!");
         return -1;
     }
 
-    FreePlugins();
+    opened_archive a;
+
+    if (!FlexArch_TryOpenArchive(&a, archive_path))
+    {
+        printf("Could not open archive %s", archive_path);
+        return -1;
+    }
+
+    if (list)
+    {
+        ListArchiveFiles(&a);
+    }
+
+    if (add)
+    {
+
+    }
+
+    if (extract)
+    {
+
+    }
+
+    a.used_plugin.Archive_Save(a.handle);
+    a.used_plugin.Archive_Close(a.handle);
+
+    FlexArch_FreePlugins();
 
     return 0;
 }

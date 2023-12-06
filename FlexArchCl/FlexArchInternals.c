@@ -1,7 +1,7 @@
-#include "common_code.h"
+#include "FlexArchInternals.h"
 
 #define LOADADDR(x) plugin->x = (x)GetProcAddress(plugin->module, #x); if(!plugin->x) return false;
-bool LoadPlugin(PluginFunctionsCollection* plugin, wchar_t* path)
+static bool FlexArch_LoadPlugin(PluginFunctionsCollection* plugin, wchar_t* path)
 {
     plugin->module = LoadLibraryW(path);
     if (!plugin->module)
@@ -33,7 +33,7 @@ bool LoadPlugin(PluginFunctionsCollection* plugin, wchar_t* path)
 PluginFunctionsCollection* LoadedPlugins;
 size_t LoadedPluginsCount;
 
-void CollectPlugins()
+void FlexArch_CollectPlugins()
 {
     PluginFunctionsCollection plugin;
     WIN32_FIND_DATAW found;
@@ -56,7 +56,7 @@ void CollectPlugins()
 
     do
     {
-        if (!LoadPlugin(&plugin, found.cFileName))
+        if (!FlexArch_LoadPlugin(&plugin, found.cFileName))
         {
             continue;
         }
@@ -79,7 +79,7 @@ void CollectPlugins()
     FindClose(find_handle);
 }
 
-void FreePlugins()
+void FlexArch_FreePlugins()
 {
     free(LoadedPlugins);
 
@@ -87,7 +87,24 @@ void FreePlugins()
     LoadedPluginsCount = 0;
 }
 
-int TryOpenArchive()
+bool FlexArch_TryOpenArchive(opened_archive *arch, char *path)
 {
+    size_t i;
 
+    for (i = 0; i < LoadedPluginsCount; ++i)
+    {
+        if (LoadedPlugins[i].Archive_Open(&arch->handle, path) == FA_SUCCESS)
+        {
+            memcpy(&arch->used_plugin, &LoadedPlugins[i], sizeof(*LoadedPlugins));
+            arch->have_unsaved_changes = false;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+const char* FlexArch_GetErrorDescription(FlexArchResult error_code)
+{
+    return u8"placeholder_value";
 }

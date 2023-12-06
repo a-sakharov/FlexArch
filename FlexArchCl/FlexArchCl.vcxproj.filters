@@ -18,12 +18,12 @@
     <ClCompile Include="FlexArchCl.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="common_code.c">
+    <ClCompile Include="FlexArchInternals.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="common_code.h">
+    <None Include="FlexArchInternals.h">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

@@ -1,5 +1,5 @@
-#ifndef COMMON_CODE_H
-#define COMMON_CODE_H
+#ifndef FLEXARCHINTERNALS_H
+#define FLEXARCHINTERNALS_H
 
 #include <FlexArch/plugin.h>
 #include <stdbool.h>
@@ -35,14 +35,17 @@ typedef struct PluginFunctionsCollection_t PluginFunctionsCollection;
 struct opened_archive_t
 {
     archive_handle handle;
-
+    PluginFunctionsCollection used_plugin;
+    bool have_unsaved_changes;
 };
 typedef struct opened_archive_t opened_archive;
 
 extern PluginFunctionsCollection* LoadedPlugins;
 extern size_t LoadedPluginsCount;
 
-void CollectPlugins();
-void FreePlugins();
+void FlexArch_CollectPlugins();
+void FlexArch_FreePlugins();
+bool FlexArch_TryOpenArchive(opened_archive* arch, char* path);
+const char* FlexArch_GetErrorDescription(FlexArchResult error_code);
 
 #endif
