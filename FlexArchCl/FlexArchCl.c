@@ -42,7 +42,7 @@ void ListPlugins()
 
 void ListArchiveFiles(opened_archive *archive)
 {
-    printf("ID\tSIZE\t\tCDATE\t\t\tMDATE\t\t\tNAME\n");
+    printf("PARENT\tID\tSIZE\t\tCDATE\t\t\tMDATE\t\t\tNAME\n");
     archive->used_plugin.Archive_EnumerateEntries(archive->handle, NULL, archive_enumeration_receiver);
 }
 
@@ -73,7 +73,7 @@ void archive_enumeration_receiver(archive_handle archive, void* context, archive
         snprintf(size, sizeof(size), "%"PRIu64, entry->size);
     }
 
-    printf("%"PRIu64 "\t" "%s\t\t" "%s\t" "%s\t" "%s\n", entry->id, size, ctime_iso, mtime_iso, entry->super_name ? entry->super_name : entry->name);
+    printf("%"PRIu64 "\t" "%"PRIu64 "\t" "%s\t\t" "%s\t" "%s\t" "%s\n", entry->parent, entry->id, size, ctime_iso, mtime_iso, entry->super_name ? entry->super_name : entry->name);
 }
 
 void ReportError(char *situation, FlexArchResult code, PluginFunctionsCollection *plugin)
