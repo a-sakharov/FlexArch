@@ -5,6 +5,7 @@
 #include <inttypes.h>
 
 
+
 PluginFunctionsCollection* LoadedPlugins;
 size_t LoadedPluginsCount;
 
@@ -259,4 +260,56 @@ void FlexArch_FormatSizeHumanly(char* str, size_t chars, uint64_t size)
     {
         snprintf(str, chars, "%"PRIu64 "%c", sz, ltr);
     }
+}
+
+char* FlexArch_CreateFullPath(opened_archive* arch, archive_entry* entry)
+{
+    char* result = NULL;
+    void* temp;
+    char* fname;
+    FlexArchResult r;
+    archive_entry local_entry;
+    size_t len;
+
+    result = strdup(entry->super_name ? entry->super_name : entry->name);
+
+    local_entry.parent = entry->parent;
+
+    while (local_entry.parent != 0)
+    {
+        local_entry.id = local_entry.parent;
+
+        r = arch->used_plugin.Archive_GetEntryInfo(arch->handle, &local_entry);
+        if (r != FA_SUCCESS)
+        {
+            free(result);
+            return NULL;
+        }
+
+        fname = local_entry.super_name ? local_entry.super_name : local_entry.name;
+
+        temp = malloc(strlen(result) + 1 + strlen(fname) + 1);
+        if (!temp)
+        {
+            if (local_entry.super_name)
+            {
+                free(local_entry.super_name);
+            }
+            free(result);
+            return NULL;
+        }
+
+        memcpy(temp, fname, strlen(fname));
+        ((char*)temp)[strlen(fname)] = '/';
+        memcpy((char*)temp + strlen(fname) + 1, result, strlen(result) + 1);
+        free(result);
+        result = temp;
+
+        if (local_entry.super_name)
+        {
+            free(local_entry.super_name);
+        }
+    }
+
+    return result;
 }

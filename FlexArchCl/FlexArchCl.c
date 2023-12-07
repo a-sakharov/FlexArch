@@ -5,7 +5,9 @@
 #include <inttypes.h>
 #include <FlexArch/plugin.h>
 #include "FlexArchInternals.h"
-
+#if defined(_WIN32) && defined(_DEBUG)
+#include <crtdbg.h>
+#endif
 
 //run rules
 static bool PrintFullPath = false;
@@ -50,7 +52,7 @@ static void ListPlugins()
 static void ListArchiveFiles(opened_archive *archive)
 {
     printf("PARENT\tID\tSIZE\t\tCDATE\t\t\tMDATE\t\t\tNAME\n");
-    archive->used_plugin.Archive_EnumerateEntries(archive->handle, NULL, archive_enumeration_receiver);
+    archive->used_plugin.Archive_EnumerateEntries(archive->handle, archive, archive_enumeration_receiver);
 }
 
 static void archive_enumeration_receiver(archive_handle archive, void* context, archive_entry* entry, uint8_t last_item)
@@ -68,6 +70,7 @@ static void archive_enumeration_receiver(archive_handle archive, void* context, 
     strftime(mtime_iso, sizeof(mtime_iso), "%Y-%m-%d %H:%M:%S", &mtime);
 
     char size[64];
+    char* fname;
 
     if (entry->flags & FA_ENTRY_IS_DIRECTORY)
     {
@@ -85,7 +88,21 @@ static void archive_enumeration_receiver(archive_handle archive, void* context, 
         }
     }
 
-    printf("%"PRIu64 "\t" "%"PRIu64 "\t" "%s\t\t" "%s\t" "%s\t" "%s\n", entry->parent, entry->id, size, ctime_iso, mtime_iso, entry->super_name ? entry->super_name : entry->name);
+    if (PrintFullPath)
+    {
+        fname = FlexArch_CreateFullPath((opened_archive *)context, entry);
+    }
+    else
+    {
+        fname = entry->super_name ? entry->super_name : entry->name;
+    }
+
+    printf("%"PRIu64 "\t" "%"PRIu64 "\t" "%s\t\t" "%s\t" "%s\t" "%s\n", entry->parent, entry->id, size, ctime_iso, mtime_iso, fname);
+
+    if (PrintFullPath)
+    {
+        free(fname);
+    }
 }
 
 static void ReportError(char *situation, FlexArchResult code, PluginFunctionsCollection *plugin)
@@ -215,6 +232,10 @@ int main(int argc, char** argv)
     a.used_plugin.Archive_Close(a.handle);
 
     FlexArch_FreePlugins();
+
+#if defined(_WIN32) && defined(_DEBUG)
+    _CrtDumpMemoryLeaks();
+#endif
 
     return 0;
 }

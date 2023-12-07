@@ -54,5 +54,6 @@ void FlexArch_FreePlugins();
 bool FlexArch_TryOpenArchive(opened_archive* arch, char* path);
 const char* FlexArch_GetErrorDescription(FlexArchResult error_code);
 void FlexArch_FormatSizeHumanly(char* str, size_t chars, uint64_t size);
+char* FlexArch_CreateFullPath(opened_archive *arch, archive_entry *entry);
 
 #endif

@@ -57,7 +57,7 @@ struct archive_entry_t
 {
     uint64_t id;                /**< unique id inside archive*/
     char name[128];             /**< utf-8 name*/
-    const char *super_name;     /**< null if not used, pointer to string if `name` size is not enought*/
+    char *super_name;           /**< null if not used, pointer to string if `name` size is not enought. Should be freed via free() if got via Archive_GetEntryInfo*/
     uint64_t flags;             /**< defined in ARCHIVE_ENTRY_FLAGS*/
     uint64_t parent;            /**< 0 if top-level, othervise id of parent entry (parent should have directory flag)*/
     uint64_t size;              /**< uncompressed size*/

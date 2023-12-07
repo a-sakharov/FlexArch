@@ -2,6 +2,9 @@
 #include <zip.h>
 #include <string.h>
 #include <stdlib.h>
+#if defined(_WIN32) && defined(_DEBUG)
+#include <crtdbg.h>
+#endif
 
 
 //internal, hidden fron plugin user stuff
@@ -42,7 +45,7 @@ static FlexArchResult PushDirectory(archive_context archive, const char *name, z
     archive->directories_count++;
     archive->directories = temp;
 
-    archive->directories[archive->directories_count - 1].id = id;
+    archive->directories[archive->directories_count - 1].id = id + 1;//id=0 reserved for core directory
     archive->directories[archive->directories_count - 1].name = strdup(name);
 
     if (!archive->directories[archive->directories_count - 1].name)
@@ -107,17 +110,24 @@ static FlexArchResult FixEntryDirectory(archive_context archive, archive_entry* 
     }
 
     *namestart = '\0';
-    entry->super_name = namestart + 1;
+    entry->super_name = strdup(namestart + 1);
+    if (!entry->super_name)
+    {
+        return FA_SYSTEM_ERROR;
+    }
 
     uint64_t i;
     for (i=0; i< archive->directories_count; ++i)
     {
         if (!strcmp(dirpath, archive->directories[i].name))
         {
+            free(dirpath);
             entry->parent = archive->directories[i].id;
             return FA_SUCCESS;
         }
     }
+
+    free(entry->super_name);
 
     return FA_SYSTEM_ERROR; //TODO: not an actual system error
 }
@@ -185,9 +195,20 @@ FlexArchResult Archive_Save(archive_context archive)
 
 FlexArchResult Archive_Close(archive_context archive)
 {
+    uint64_t i;
+
+    for (i = 0; i < archive->directories_count; ++i)
+    {
+        free(archive->directories[i].name);
+    }
+
     free(archive->directories);
     zip_close(archive->zip_handle);
     free(archive);
+
+#if defined(_WIN32) && defined(_DEBUG)
+    _CrtDumpMemoryLeaks();
+#endif
 
     return FA_SUCCESS;
 }
@@ -212,53 +233,21 @@ FlexArchResult Archive_EnumerateEntries(archive_context archive, void *context, 
     zip_int64_t num_entries = zip_get_num_entries(archive->zip_handle, 0);
     zip_int64_t i;
     archive_entry entry;
-    zip_stat_t stat;
-    char *curname = NULL;
     FlexArchResult r;
 
     for (i=0; i< num_entries; ++i)
     {
-        if (zip_stat_index(archive->zip_handle, i, ZIP_FL_ENC_UTF_8, &stat))
-        {
-            return zip_get_error(archive->zip_handle)->zip_err | 0x80000000;
-        }
+        entry.id = i + 1;
 
-        entry.id = stat.index;
-        entry.flags = 0;
-        entry.parent = 0;
-        entry.size = stat.size;
-        entry.size_in_archive = stat.comp_size;
-        entry.creation_date = 0;
-        entry.modification_date = stat.mtime;
-
-        curname = strdup(stat.name);
-        if (!curname)
+        r = Archive_GetEntryInfo(archive, &entry);
+        if (r != FA_SUCCESS)
         {
-            return FA_SYSTEM_ERROR;
-        }
-
-        size_t len_name = strlen(curname);
-        if (len_name > 1 && curname[len_name - 1] == '/')
-        {
-            curname[strlen(curname) - 1] = '\0';
-            entry.flags |= FA_ENTRY_IS_DIRECTORY;
-        }
-        entry.super_name = curname;
-
-        if (strchr(entry.super_name, '/'))
-        {
-            //get parent directory, cut directory path
-            r = FixEntryDirectory(archive , &entry);
-            if (r != FA_SUCCESS)
-            {
-                free(curname);
-                return r;
-            }
+            return r;
         }
 
         callback(archive, context , &entry, i == num_entries - 1 ? 1 : 0);
 
-        free(curname);
+        free(entry.super_name);
     }
 
     return FA_SUCCESS;
@@ -276,5 +265,44 @@ FlexArchResult Archive_RegisterStatusCallback(status_callback callback)
 
 FlexArchResult Archive_GetEntryInfo(archive_context archive, archive_entry* archive_item)
 {
-    return FA_NOT_IMPLEMENTID;
+    zip_stat_t stat;
+    FlexArchResult r;
+
+    if (zip_stat_index(archive->zip_handle, archive_item->id - 1, ZIP_FL_ENC_UTF_8, &stat))
+    {
+        return zip_get_error(archive->zip_handle)->zip_err | 0x80000000;
+    }
+
+    archive_item->flags = 0;
+    archive_item->parent = 0;
+    archive_item->size = stat.size;
+    archive_item->size_in_archive = stat.comp_size;
+    archive_item->creation_date = 0;
+    archive_item->modification_date = stat.mtime;
+
+    archive_item->super_name = strdup(stat.name);
+    if (!archive_item->super_name)
+    {
+        return FA_SYSTEM_ERROR;
+    }
+
+    size_t len_name = strlen(archive_item->super_name);
+    if (len_name > 1 && archive_item->super_name[len_name - 1] == '/')
+    {
+        archive_item->super_name[len_name - 1] = '\0';
+        archive_item->flags |= FA_ENTRY_IS_DIRECTORY;
+    }
+
+    if (strchr(archive_item->super_name, '/'))
+    {
+        //get parent directory, cut directory path
+        r = FixEntryDirectory(archive, archive_item);
+        if (r != FA_SUCCESS)
+        {
+            free(archive_item->super_name);
+            return r;
+        }
+    }
+
+    return FA_SUCCESS;
 }
