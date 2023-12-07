@@ -287,8 +287,9 @@ char* FlexArch_CreateFullPath(opened_archive* arch, archive_entry* entry)
         }
 
         fname = local_entry.super_name ? local_entry.super_name : local_entry.name;
+        len = strlen(fname);
 
-        temp = malloc(strlen(result) + 1 + strlen(fname) + 1);
+        temp = malloc(strlen(result) + 1 + len + 1);
         if (!temp)
         {
             if (local_entry.super_name)
@@ -299,9 +300,9 @@ char* FlexArch_CreateFullPath(opened_archive* arch, archive_entry* entry)
             return NULL;
         }
 
-        memcpy(temp, fname, strlen(fname));
-        ((char*)temp)[strlen(fname)] = '/';
-        memcpy((char*)temp + strlen(fname) + 1, result, strlen(result) + 1);
+        memcpy(temp, fname, len);
+        ((char*)temp)[len] = '/';
+        memcpy((char*)temp + len + 1, result, strlen(result) + 1);
         free(result);
         result = temp;
 

@@ -1,5 +1,5 @@
 .PHONY: clean all
-CFLAGS := -I..
+CFLAGS := -I.. -g
 LIBS := -lzip
 LDFLAGS := -shared
 

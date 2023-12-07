@@ -5,18 +5,25 @@
 #include <inttypes.h>
 #include <FlexArch/plugin.h>
 #include "FlexArchInternals.h"
+#include <stdlib.h>
+
+
 #if defined(_WIN32) && defined(_DEBUG)
 #include <crtdbg.h>
+#endif
+
+#ifndef _WIN32
+#define gmtime_s(a, b) gmtime_r(b, a)
 #endif
 
 //run rules
 static bool PrintFullPath = false;
 static bool PrintHumanReadableSize = false;
 
-void PrintHelp();
-void PrintVersion();
-void ListPlugins();
-void archive_enumeration_receiver(archive_handle archive, void* context, archive_entry* entry, uint8_t last_item);
+static void PrintHelp();
+static void PrintVersion();
+static void ListPlugins();
+static void archive_enumeration_receiver(archive_handle archive, void* context, archive_entry* entry, uint8_t last_item);
 
 
 static void PrintHelp()

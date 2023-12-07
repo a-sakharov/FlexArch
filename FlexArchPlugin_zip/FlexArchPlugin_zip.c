@@ -7,7 +7,7 @@
 #endif
 
 
-//internal, hidden fron plugin user stuff
+//internal, hidden from plugin user stuff
 struct dirinfo_t
 {
     zip_int64_t id;
@@ -24,6 +24,7 @@ struct archive_context_t
     uint64_t directories_count;
 };
 typedef struct archive_context_t *archive_context;
+
 
 static FlexArchResult PushDirectory(archive_context archive, const char *name, zip_int64_t id)
 {
@@ -95,6 +96,8 @@ static FlexArchResult EnumerateDirectories(archive_context archive)
 
 static FlexArchResult FixEntryDirectory(archive_context archive, archive_entry* entry)
 {
+    archive_context arcontext = (archive_context)archive;
+
     char* namestart;
     char* dirpath;
     size_t len;
@@ -152,8 +155,9 @@ const char* Plugin_ErrorCodeDescription(FlexArchResult error_code, uint16_t rese
     return zip_error_strerror(&err);
 }
 
-FlexArchResult Archive_Open(archive_context* archive, char* local_path)
+FlexArchResult Archive_Open(archive_handle* archive, char* local_path)
 {
+    archive_context arcontext;
     zip_t* zip;
     FlexArchResult r;
 
@@ -163,19 +167,21 @@ FlexArchResult Archive_Open(archive_context* archive, char* local_path)
         return FA_CORRUPTED_ARCHIVE;
     }
 
-    *archive = calloc(1, sizeof(**archive));
+    *archive = calloc(1, sizeof(*arcontext));
     if (!*archive)
     {
         zip_close(zip);
         return FA_SYSTEM_ERROR;
     }
 
-    (*archive)->zip_handle = zip;
+    arcontext = (archive_context)*archive;
 
-    r = EnumerateDirectories(*archive);
+    arcontext->zip_handle = zip;
+
+    r = EnumerateDirectories(arcontext);
     if (r != FA_SUCCESS)
     {
-        free(*archive);
+        free(arcontext);
         zip_close(zip);
         return r;
     }
@@ -183,28 +189,34 @@ FlexArchResult Archive_Open(archive_context* archive, char* local_path)
     return FA_SUCCESS;
 }
 
-FlexArchResult Archive_Create(archive_context* archive, char* local_path, char* flags)
+FlexArchResult Archive_Create(archive_handle* archive, char* local_path, char* flags)
 {
+    archive_context arcontext = (archive_context)archive;
+
     return FA_NOT_IMPLEMENTID;
 }
 
-FlexArchResult Archive_Save(archive_context archive)
+FlexArchResult Archive_Save(archive_handle archive)
 {
+    archive_context arcontext = (archive_context)archive;
+
     return FA_SUCCESS; //there no special SAVE call for libzip, all work done in Archive_Close
 }
 
-FlexArchResult Archive_Close(archive_context archive)
+FlexArchResult Archive_Close(archive_handle archive)
 {
+    archive_context arcontext = (archive_context)archive;
+
     uint64_t i;
 
-    for (i = 0; i < archive->directories_count; ++i)
+    for (i = 0; i < arcontext->directories_count; ++i)
     {
-        free(archive->directories[i].name);
+        free(arcontext->directories[i].name);
     }
 
-    free(archive->directories);
-    zip_close(archive->zip_handle);
-    free(archive);
+    free(arcontext->directories);
+    zip_close(arcontext->zip_handle);
+    free(arcontext);
 
 #if defined(_WIN32) && defined(_DEBUG)
     _CrtDumpMemoryLeaks();
@@ -213,24 +225,32 @@ FlexArchResult Archive_Close(archive_context archive)
     return FA_SUCCESS;
 }
 
-FlexArchResult Archive_AddFileLocal(archive_context archive, archive_entry* archive_item, char* local_path)
+FlexArchResult Archive_AddFileLocal(archive_handle archive, archive_entry* archive_item, char* local_path)
 {
+    archive_context arcontext = (archive_context)archive;
+
     return FA_NOT_IMPLEMENTID;
 }
 
-FlexArchResult Archive_RemoveEntry(archive_context archive, archive_entry* archive_item)
+FlexArchResult Archive_RemoveEntry(archive_handle archive, archive_entry* archive_item)
 {
+    archive_context arcontext = (archive_context)archive;
+
     return FA_NOT_IMPLEMENTID;
 }
 
-FlexArchResult Archive_CreateDirectory(archive_context archive, archive_entry* archive_path)
+FlexArchResult Archive_CreateDirectory(archive_handle archive, archive_entry* archive_path)
 {
+    archive_context arcontext = (archive_context)archive;
+
     return FA_NOT_IMPLEMENTID;
 }
 
-FlexArchResult Archive_EnumerateEntries(archive_context archive, void *context, archive_enumerate_callback callback)
+FlexArchResult Archive_EnumerateEntries(archive_handle archive, void *context, archive_enumerate_callback callback)
 {
-    zip_int64_t num_entries = zip_get_num_entries(archive->zip_handle, 0);
+    archive_context arcontext = (archive_context)archive;
+
+    zip_int64_t num_entries = zip_get_num_entries(arcontext->zip_handle, 0);
     zip_int64_t i;
     archive_entry entry;
     FlexArchResult r;
@@ -253,24 +273,29 @@ FlexArchResult Archive_EnumerateEntries(archive_context archive, void *context, 
     return FA_SUCCESS;
 }
 
-FlexArchResult Archive_ExtractFiles(archive_context archive, char* local_dir_path, archive_entry* archive_item, uint64_t archive_item_count)
+FlexArchResult Archive_ExtractFiles(archive_handle archive, char* local_dir_path, archive_entry* archive_item, uint64_t archive_item_count)
 {
+    archive_context arcontext = (archive_context)archive;
+
     return FA_NOT_IMPLEMENTID;
 }
 
 FlexArchResult Archive_RegisterStatusCallback(status_callback callback)
 {
+
     return FA_NOT_IMPLEMENTID;
 }
 
-FlexArchResult Archive_GetEntryInfo(archive_context archive, archive_entry* archive_item)
+FlexArchResult Archive_GetEntryInfo(archive_handle archive, archive_entry* archive_item)
 {
+    archive_context arcontext = (archive_context)archive;
+
     zip_stat_t stat;
     FlexArchResult r;
 
-    if (zip_stat_index(archive->zip_handle, archive_item->id - 1, ZIP_FL_ENC_UTF_8, &stat))
+    if (zip_stat_index(arcontext->zip_handle, archive_item->id - 1, ZIP_FL_ENC_UTF_8, &stat))
     {
-        return zip_get_error(archive->zip_handle)->zip_err | 0x80000000;
+        return zip_get_error(arcontext->zip_handle)->zip_err | 0x80000000;
     }
 
     archive_item->flags = 0;
@@ -296,7 +321,7 @@ FlexArchResult Archive_GetEntryInfo(archive_context archive, archive_entry* arch
     if (strchr(archive_item->super_name, '/'))
     {
         //get parent directory, cut directory path
-        r = FixEntryDirectory(archive, archive_item);
+        r = FixEntryDirectory(arcontext, archive_item);
         if (r != FA_SUCCESS)
         {
             free(archive_item->super_name);
