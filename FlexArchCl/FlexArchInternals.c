@@ -1,6 +1,8 @@
 #include "FlexArchInternals.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 
 PluginFunctionsCollection* LoadedPlugins;
@@ -216,4 +218,45 @@ bool FlexArch_TryOpenArchive(opened_archive *arch, char *path)
 const char* FlexArch_GetErrorDescription(FlexArchResult error_code)
 {
     return u8"placeholder_value";
+}
+
+void FlexArch_FormatSizeHumanly(char* str, size_t chars, uint64_t size)
+{
+    uint64_t sz;
+    uint64_t subsz;
+    char ltr;
+    uint64_t m;
+
+    if (size < 1024)//bytes
+    {
+        snprintf(str, chars, "%"PRIu64, size);
+        return;
+    }
+    else if (size < 1024 * 1024)//Kbytes
+    {
+        m = 1024;
+        ltr = 'K';
+    }
+    else if (size < 1024 * 1024 * 1024)//Mbytes
+    {
+        m = 1024 * 1024;
+        ltr = 'M';
+    }
+    else //Gbytes
+    {
+        m = 1024 * 1024 * 1024;
+        ltr = 'G';
+    }
+
+    sz = size / m;
+    subsz = ((size % m) * 10) / m;
+
+    if (subsz)
+    {
+        snprintf(str, chars, "%"PRIu64 ".%"PRIu64 "%c", sz, subsz, ltr);
+    }
+    else
+    {
+        snprintf(str, chars, "%"PRIu64 "%c", sz, ltr);
+    }
 }

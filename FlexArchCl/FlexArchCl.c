@@ -15,46 +15,7 @@ void PrintHelp();
 void PrintVersion();
 void ListPlugins();
 void archive_enumeration_receiver(archive_handle archive, void* context, archive_entry* entry, uint8_t last_item);
-void FormatSizeHumanly(char *str, size_t chars, uint64_t size)
-{
-    uint64_t sz;
-    uint64_t subsz;
-    char ltr;
-    uint64_t m;
 
-    if (size < 1024)//bytes
-    {
-        snprintf(str, chars, "%"PRIu64, size);
-        return;
-    }
-    else if (size < 1024 * 1024)//Kbytes
-    {
-        m = 1024;
-        ltr = 'K';
-    }
-    else if (size < 1024 * 1024 * 1024)//Mbytes
-    {
-        m = (1024 * 1024);
-        ltr = 'M';
-    }
-    else //Gbytes
-    {
-        m = (1024 * 1024 * 1024);
-        ltr = 'G';
-    }
-
-    sz = size / m;
-    subsz = ((size % m) * 10) / m;
-
-    if (subsz)
-    {
-        snprintf(str, chars, "%"PRIu64 ".%"PRIu64 "%c", sz, subsz, ltr);
-    }
-    else
-    {
-        snprintf(str, chars, "%"PRIu64 "%c", sz, ltr);
-    }
-}
 
 static void PrintHelp()
 {
@@ -116,7 +77,7 @@ static void archive_enumeration_receiver(archive_handle archive, void* context, 
     {
         if (PrintHumanReadableSize)
         {
-            FormatSizeHumanly(size, sizeof(size), entry->size);
+            FlexArch_FormatSizeHumanly(size, sizeof(size), entry->size);
         }
         else
         {
