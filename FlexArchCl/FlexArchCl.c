@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <getopt.h>
 #include <ctype.h>
+#include <inttypes.h>
 #include <FlexArch/plugin.h>
 #include "FlexArchInternals.h"
 
@@ -9,7 +10,7 @@
 void PrintHelp();
 void PrintVersion();
 void ListPlugins();
-void archive_enumerate(archive_handle archive, archive_entry* entry, uint8_t last_item);
+void archive_enumeration_receiver(archive_handle archive, void* context, archive_entry* entry, uint8_t last_item);
 
 void PrintHelp()
 {
@@ -41,22 +42,52 @@ void ListPlugins()
 
 void ListArchiveFiles(opened_archive *archive)
 {
-    archive->used_plugin.Archive_EnumerateEntries(archive->handle, archive_enumerate);
+    printf("ID\tSIZE\t\tCDATE\t\t\tMDATE\t\t\tNAME\n");
+    archive->used_plugin.Archive_EnumerateEntries(archive->handle, NULL, archive_enumeration_receiver);
 }
 
-void archive_enumerate(archive_handle archive, archive_entry* entry, uint8_t last_item)
+void archive_enumeration_receiver(archive_handle archive, void* context, archive_entry* entry, uint8_t last_item)
 {
-    printf("%s\n", entry->super_name ? entry->super_name : entry->name);
+    struct tm ctime;
+    struct tm mtime;
+
+    gmtime_s(&ctime, &entry->creation_date);
+    gmtime_s(&mtime, &entry->modification_date);
+
+    char ctime_iso[64];
+    char mtime_iso[64];
+
+    strftime(ctime_iso, sizeof(ctime_iso), "%Y-%m-%d %H:%M:%S", &ctime);
+    strftime(mtime_iso, sizeof(mtime_iso), "%Y-%m-%d %H:%M:%S", &mtime);
+
+    char size[64];
+
+    if (entry->flags & FA_ENTRY_IS_DIRECTORY)
+    {
+        snprintf(size, sizeof(size), "<DIR>");
+    }
+    else
+    {
+        //constrt size to kb, mb, gb?
+        //add space every 3 digits?
+        snprintf(size, sizeof(size), "%"PRIu64, entry->size);
+    }
+
+    printf("%"PRIu64 "\t" "%s\t\t" "%s\t" "%s\t" "%s\n", entry->id, size, ctime_iso, mtime_iso, entry->super_name ? entry->super_name : entry->name);
 }
 
 void ReportError(char *situation, FlexArchResult code, PluginFunctionsCollection *plugin)
 {
-    printf("While performing %s gor error %ud (%s)", situation, code,
+    printf("While performing %s got error %ud (%s)", situation, code,
         code <= FA_PREDEFINED_ERRORS_MAX ? FlexArch_GetErrorDescription(code) : plugin->Plugin_ErrorCodeDescription(code, 0));
 }
 
 int main(int argc, char** argv)
 {
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+#endif
+
     FlexArch_CollectPlugins();
 
     int c;

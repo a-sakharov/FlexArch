@@ -57,7 +57,7 @@ struct archive_entry_t
 {
     uint64_t id;                /**< unique id inside archive*/
     char name[128];             /**< utf-8 name*/
-    char *super_name;           /**< null if not used, pointer to string if `name` size is not enought*/
+    const char *super_name;     /**< null if not used, pointer to string if `name` size is not enought*/
     uint64_t flags;             /**< defined in ARCHIVE_ENTRY_FLAGS*/
     uint64_t parent;            /**< 0 if top-level, othervise id of parent entry (parent should have directory flag)*/
     uint64_t size;              /**< uncompressed size*/
@@ -118,7 +118,7 @@ typedef void* archive_handle;
 * \param[in] entry
 * \param[in] last_item
 */
-typedef void (FLEXARCH_CALL_TYPE *archive_enumerate_callback)(archive_handle archive, archive_entry* entry, uint8_t last_item);
+typedef void (FLEXARCH_CALL_TYPE *archive_enumerate_callback)(archive_handle archive, void *context, archive_entry* entry, uint8_t last_item);
 
 /**
 * \brief Used in Archive_RegisterStatusCallback
@@ -223,10 +223,11 @@ FLEXARCH_PLUGIN_API(Archive_CreateDirectory)(archive_handle archive, archive_ent
 /**
 * \brief 
 * \param[in] archive Archive handle, created by Archive_Open or Archive_Create
+* \param[in] context Enumeration context, should be passed to callback every call
 * \param[in] callback callback to be used for enumeration. archive should be always same as passed to Archive_EnumerateEntries, entry is current item node (super_name buffer can be freed after callback call) and should be NULL for empty archive, last item *should* be set to non-zero for last call and *shoud* be set to zero for any other call.
 * \return error code
 */
-FLEXARCH_PLUGIN_API(Archive_EnumerateEntries)(archive_handle archive, archive_enumerate_callback callback);
+FLEXARCH_PLUGIN_API(Archive_EnumerateEntries)(archive_handle archive, void *context, archive_enumerate_callback callback);
 
 /**
 * \brief
