@@ -7,12 +7,56 @@
 #include "FlexArchInternals.h"
 
 
+//run rules
+static bool PrintFullPath = false;
+static bool PrintHumanReadableSize = false;
+
 void PrintHelp();
 void PrintVersion();
 void ListPlugins();
 void archive_enumeration_receiver(archive_handle archive, void* context, archive_entry* entry, uint8_t last_item);
+void FormatSizeHumanly(char *str, size_t chars, uint64_t size)
+{
+    uint64_t sz;
+    uint64_t subsz;
+    char ltr;
+    uint64_t m;
 
-void PrintHelp()
+    if (size < 1024)//bytes
+    {
+        snprintf(str, chars, "%"PRIu64, size);
+        return;
+    }
+    else if (size < 1024 * 1024)//Kbytes
+    {
+        m = 1024;
+        ltr = 'K';
+    }
+    else if (size < 1024 * 1024 * 1024)//Mbytes
+    {
+        m = (1024 * 1024);
+        ltr = 'M';
+    }
+    else //Gbytes
+    {
+        m = (1024 * 1024 * 1024);
+        ltr = 'G';
+    }
+
+    sz = size / m;
+    subsz = ((size % m) * 10) / m;
+
+    if (subsz)
+    {
+        snprintf(str, chars, "%"PRIu64 ".%"PRIu64 "%c", sz, subsz, ltr);
+    }
+    else
+    {
+        snprintf(str, chars, "%"PRIu64 "%c", sz, ltr);
+    }
+}
+
+static void PrintHelp()
 {
     PrintVersion();
 
@@ -23,14 +67,16 @@ void PrintHelp()
     printf("-l or --list to list files in archive\n");
     printf("-d or --extract to extract files from archive to current folder\n");
     printf("-a or --add to add files from current folder to archive\n");
+    printf("-u or --fullpath to print full path to file, instead of name-only\n");
+    printf("-m or --human to print file size in human-readable form\n");
 }
 
-void PrintVersion()
+static void PrintVersion()
 {
     printf("FlexArchCl. Alpha build %s %s\n", __DATE__, __TIME__);
 }
 
-void ListPlugins()
+static void ListPlugins()
 {
     size_t i;
     printf("Total %zd plugins loaded:\n", LoadedPluginsCount);
@@ -40,13 +86,13 @@ void ListPlugins()
     }
 }
 
-void ListArchiveFiles(opened_archive *archive)
+static void ListArchiveFiles(opened_archive *archive)
 {
     printf("PARENT\tID\tSIZE\t\tCDATE\t\t\tMDATE\t\t\tNAME\n");
     archive->used_plugin.Archive_EnumerateEntries(archive->handle, NULL, archive_enumeration_receiver);
 }
 
-void archive_enumeration_receiver(archive_handle archive, void* context, archive_entry* entry, uint8_t last_item)
+static void archive_enumeration_receiver(archive_handle archive, void* context, archive_entry* entry, uint8_t last_item)
 {
     struct tm ctime;
     struct tm mtime;
@@ -68,15 +114,20 @@ void archive_enumeration_receiver(archive_handle archive, void* context, archive
     }
     else
     {
-        //constrt size to kb, mb, gb?
-        //add space every 3 digits?
-        snprintf(size, sizeof(size), "%"PRIu64, entry->size);
+        if (PrintHumanReadableSize)
+        {
+            FormatSizeHumanly(size, sizeof(size), entry->size);
+        }
+        else
+        {
+            snprintf(size, sizeof(size), "%"PRIu64, entry->size);
+        }
     }
 
     printf("%"PRIu64 "\t" "%"PRIu64 "\t" "%s\t\t" "%s\t" "%s\t" "%s\n", entry->parent, entry->id, size, ctime_iso, mtime_iso, entry->super_name ? entry->super_name : entry->name);
 }
 
-void ReportError(char *situation, FlexArchResult code, PluginFunctionsCollection *plugin)
+static void ReportError(char *situation, FlexArchResult code, PluginFunctionsCollection *plugin)
 {
     printf("While performing %s got error %ud (%s)", situation, code,
         code <= FA_PREDEFINED_ERRORS_MAX ? FlexArch_GetErrorDescription(code) : plugin->Plugin_ErrorCodeDescription(code, 0));
@@ -97,9 +148,12 @@ int main(int argc, char** argv)
         { "plugins", no_argument,       0, 'p' },
         { "help",    no_argument,       0, 'h' },
         { "archive", required_argument, 0, 'f' },
+
         { "list",    no_argument,       0, 'l' },
         { "extract", no_argument,       0, 'd' },
         { "add",     no_argument,       0, 'a' },
+        { "fullpath",no_argument,       0, 'u' },
+        { "human",   no_argument,       0, 'm' },
         { 0,         0,                 0,  0 }
     };
     char *archive_path = NULL;
@@ -109,7 +163,7 @@ int main(int argc, char** argv)
 
     while (1)
     {
-        c = getopt_long(argc, argv, "vphf:lda", long_options, NULL);
+        c = getopt_long(argc, argv, "vphf:ldaum", long_options, NULL);
         if (c == -1)
         {
             break;
@@ -143,6 +197,14 @@ int main(int argc, char** argv)
 
             case 'a':
             add = true;
+            break;
+
+            case 'u':
+            PrintFullPath = true;
+            break;
+
+            case 'm':
+            PrintHumanReadableSize = true;
             break;
 
             default:

@@ -3,25 +3,25 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>-f D:\SoftwareArchive\openxcom-v1.0-win64.zip --list</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-f D:\SoftwareArchive\openxcom-v1.0-win64.zip --list -m</LocalDebuggerCommandArguments>
     <LocalDebuggerEnvironment>PATH=%PATH%;D:\libs\bin</LocalDebuggerEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>-f D:\SoftwareArchive\openxcom-v1.0-win64.zip --list</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-f D:\SoftwareArchive\openxcom-v1.0-win64.zip --list -m</LocalDebuggerCommandArguments>
     <LocalDebuggerEnvironment>PATH=%PATH%;D:\libs\bin</LocalDebuggerEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>-f D:\SoftwareArchive\openxcom-v1.0-win64.zip --list</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-f D:\SoftwareArchive\openxcom-v1.0-win64.zip --list -m</LocalDebuggerCommandArguments>
     <LocalDebuggerEnvironment>PATH=%PATH%;D:\libs\bin64</LocalDebuggerEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>-f D:\SoftwareArchive\openxcom-v1.0-win64.zip --list</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-f D:\SoftwareArchive\openxcom-v1.0-win64.zip --list -m</LocalDebuggerCommandArguments>
     <LocalDebuggerEnvironment>PATH=%PATH%;D:\libs\bin64</LocalDebuggerEnvironment>
   </PropertyGroup>
 </Project>
