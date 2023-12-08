@@ -5,15 +5,19 @@ VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlexArchCl", "FlexArchCl\FlexArchCl.vcxproj", "{3BBC5FFB-A500-49A3-98A9-D13403C4CE66}"
 	ProjectSection(ProjectDependencies) = postProject
+		{6E8AA36A-D4C1-44E0-941A-810177367E07} = {6E8AA36A-D4C1-44E0-941A-810177367E07}
 		{F1AC95F3-DEEE-4133-BD08-5FF0587638BD} = {F1AC95F3-DEEE-4133-BD08-5FF0587638BD}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlexArchGui", "FlexArchGui\FlexArchGui.vcxproj", "{B9DBB421-D25F-4A02-8120-6A470E56482D}"
 	ProjectSection(ProjectDependencies) = postProject
+		{6E8AA36A-D4C1-44E0-941A-810177367E07} = {6E8AA36A-D4C1-44E0-941A-810177367E07}
 		{F1AC95F3-DEEE-4133-BD08-5FF0587638BD} = {F1AC95F3-DEEE-4133-BD08-5FF0587638BD}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlexArchPlugin_zip", "FlexArchPlugin_zip\FlexArchPlugin_zip.vcxproj", "{F1AC95F3-DEEE-4133-BD08-5FF0587638BD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlexArch", "FlexArchBase\FlexArchBase.vcxproj", "{6E8AA36A-D4C1-44E0-941A-810177367E07}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +51,14 @@ Global
 		{F1AC95F3-DEEE-4133-BD08-5FF0587638BD}.Release|x64.Build.0 = Release|x64
 		{F1AC95F3-DEEE-4133-BD08-5FF0587638BD}.Release|x86.ActiveCfg = Release|Win32
 		{F1AC95F3-DEEE-4133-BD08-5FF0587638BD}.Release|x86.Build.0 = Release|Win32
+		{6E8AA36A-D4C1-44E0-941A-810177367E07}.Debug|x64.ActiveCfg = Debug|x64
+		{6E8AA36A-D4C1-44E0-941A-810177367E07}.Debug|x64.Build.0 = Debug|x64
+		{6E8AA36A-D4C1-44E0-941A-810177367E07}.Debug|x86.ActiveCfg = Debug|Win32
+		{6E8AA36A-D4C1-44E0-941A-810177367E07}.Debug|x86.Build.0 = Debug|Win32
+		{6E8AA36A-D4C1-44E0-941A-810177367E07}.Release|x64.ActiveCfg = Release|x64
+		{6E8AA36A-D4C1-44E0-941A-810177367E07}.Release|x64.Build.0 = Release|x64
+		{6E8AA36A-D4C1-44E0-941A-810177367E07}.Release|x86.ActiveCfg = Release|Win32
+		{6E8AA36A-D4C1-44E0-941A-810177367E07}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

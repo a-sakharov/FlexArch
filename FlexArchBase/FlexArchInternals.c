@@ -87,9 +87,6 @@ void FlexArch_CollectPlugins()
     FindClose(find_handle);
 }
 #else
-#include <dirent.h>
-#include <dlfcn.h>
-#include <stdio.h>
 
 #define LOADADDR(x) plugin->x = (x)dlsym(plugin->module, #x); if(!plugin->x) {dlclose(plugin->module); return false;}
 static bool FlexArch_LoadPlugin(PluginFunctionsCollection* plugin, char* path)

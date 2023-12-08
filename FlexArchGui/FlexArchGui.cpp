@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <FlexArch/plugin.h>
+#include <FlexArchBase/plugin.h>
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>

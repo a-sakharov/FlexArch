@@ -3,8 +3,8 @@
 #include <getopt.h>
 #include <ctype.h>
 #include <inttypes.h>
-#include <FlexArch/plugin.h>
-#include "FlexArchInternals.h"
+#include <FlexArchBase/plugin.h>
+#include <FlexArchBase/FlexArchInternals.h>
 #include <stdlib.h>
 
 

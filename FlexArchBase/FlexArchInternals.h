@@ -1,11 +1,14 @@
 #ifndef FLEXARCHINTERNALS_H
 #define FLEXARCHINTERNALS_H
 
-#include <FlexArch/plugin.h>
+#include <FlexArchBase/plugin.h>
 #include <stdbool.h>
 #ifdef _WIN32
 #include <Windows.h>
 #else
+#include <dirent.h>
+#include <dlfcn.h>
+#include <stdio.h>
 #include <linux/limits.h>
 #define MAX_PATH PATH_MAX
 #endif
