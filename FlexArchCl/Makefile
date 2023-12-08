@@ -2,8 +2,8 @@
 
 CFLAGS := -I.. -DFLEXARCH_INTERNAL -g -O0
 LIBS := -ldl
-OBJECTS := FlexArchCl.o FlexArchInternals.o
-LDFLAGS := 
+OBJECTS := FlexArchCl.o
+LDFLAGS := -L../FlexArchBase -lFlexArchBase
 
 FlexArchCl: $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(LIBS)

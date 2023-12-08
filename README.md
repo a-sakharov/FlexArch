@@ -3,7 +3,7 @@
 An attemp to describe universal archive/fs interface and implement sample applications using it.
 
 Folders:
-- FlexArch - common directory, could be used for development new plugins or help to use existing plugins
+- FlexArchBase - library for accessing plugins and a header to develop new plugins
 - FlexArchCl - command-line utility
 - FlexArchGui - GUI utility implemented with wxWidgets
 - FlexArchPlugin_zip - sample plugin to access ZIP archives, using libzip
