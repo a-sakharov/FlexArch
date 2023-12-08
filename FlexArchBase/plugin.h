@@ -53,6 +53,8 @@
 #define FLEXARCH_PLUGIN_API_STRING(x)   FLEXARCH_EXPORT const char * FLEXARCH_CALL_TYPE x
 #endif
 
+// -*-*-*-*-*- STRUCTS -*-*-*-*-*-
+
 struct archive_entry_t
 {
     uint64_t id;                /**< unique id inside archive*/
@@ -69,7 +71,7 @@ struct archive_entry_t
     void* reserved[64];         /**< i am big fan of ms approach. should be zero. */
 };
 
-typedef struct archive_entry_t archive_entry;
+// -*-*-*-*-*- ENUMS -*-*-*-*-*-
 
 enum ARCHIVE_ENTRY_FLAGS
 {
@@ -101,9 +103,12 @@ enum FA_METADATA
     //codes up to 0x7FFFFFFF reserved, from 0x80000000 to 0xFFFFFFFF are implementation defined (see rule 5)
 };
 
+// -*-*-*-*-*- TYPEDEFS -*-*-*-*-*-
+
+typedef struct archive_entry_t archive_entry;
 
 /**
-*
+* Just a typedef for uint32_t to hold result code
 */
 typedef uint32_t FlexArchResult;
 
@@ -112,194 +117,205 @@ typedef uint32_t FlexArchResult;
 */
 typedef void* archive_handle;
 
-/**
-* \brief Used in Archive_ExtractFiles
-* \param[in] archive
-* \param[in] entry
-* \param[in] last_item
-*/
-typedef void (FLEXARCH_CALL_TYPE *archive_enumerate_callback)(archive_handle archive, void *context, archive_entry* entry, uint8_t last_item);
 
-/**
-* \brief Used in Archive_RegisterStatusCallback
-* \param[in] archive
-* \param[in] min_item
-* \param[in] max_item
-* \param[in] current_item
-* \param[in] current_item_percentage
-* \param[in] hint
-*/
-typedef void (FLEXARCH_CALL_TYPE *status_callback)(archive_handle archive, uint64_t min_item, uint64_t max_item, uint64_t current_item, double current_item_percentage, char* hint);
+// -*-*-*-*-*- FUNCTIONS -*-*-*-*-*-
 
-/**
-* \brief Used for buffer reading and buffer writing
-* \param[in] archive
-* \param[in] node
-* \param[in] context
-* \param[in] buffer
-* \param[in] buffer_size
-* \param[in] last
-*/
-typedef int (FLEXARCH_CALL_TYPE *reader_callback)(archive_handle archive, archive_entry* node, void *context, uint8_t* buffer, uint64_t buffer_size, uint8_t last);
+#if defined(__cplusplus) && !defined(FLEXARCH_INTERNAL)
+extern "C" {
+#endif
 
-/**
-* \brief Returns user-readable plugin name
-* \return User-readable plugin name
-*/ 
-FLEXARCH_PLUGIN_API_STRING(Plugin_GetName)();
+    /**
+    * \brief Used in Archive_ExtractFiles
+    * \param[in] archive
+    * \param[in] entry
+    * \param[in] last_item
+    */
+    typedef void (FLEXARCH_CALL_TYPE* archive_enumerate_callback)(archive_handle archive, void* context, archive_entry* entry, uint8_t last_item);
 
-/**
-* \brief Returns user-readable plugin description
-* \return User-readable plugin description
-*/ 
-FLEXARCH_PLUGIN_API_STRING(Plugin_Description)();
+    /**
+    * \brief Used in Archive_RegisterStatusCallback
+    * \param[in] archive
+    * \param[in] min_item
+    * \param[in] max_item
+    * \param[in] current_item
+    * \param[in] current_item_percentage
+    * \param[in] hint
+    */
+    typedef void (FLEXARCH_CALL_TYPE* status_callback)(archive_handle archive, uint64_t min_item, uint64_t max_item, uint64_t current_item, double current_item_percentage, char* hint);
 
+    /**
+    * \brief Used for buffer reading and buffer writing
+    * \param[in] archive
+    * \param[in] node
+    * \param[in] context
+    * \param[in] buffer
+    * \param[in] buffer_size
+    * \param[in] last
+    */
+    typedef int (FLEXARCH_CALL_TYPE* reader_callback)(archive_handle archive, archive_entry* node, void* context, uint8_t* buffer, uint64_t buffer_size, uint8_t last);
 
-/**
-* \brief Return error description by user-defined error code (see rule 5)
-* \param[in] error_code error code to get description for
-* \param[in] reserved do not use, set to 0
-* \return error description
-*/
-FLEXARCH_PLUGIN_API_STRING(Plugin_ErrorCodeDescription)(FlexArchResult error_code, uint16_t reserved);
+    /**
+    * \brief Returns user-readable plugin name
+    * \return User-readable plugin name
+    */
+    FLEXARCH_PLUGIN_API_STRING(Plugin_GetName)();
 
-/**
-* \brief Opens existing archive
-* \param[out] archive Pointer-size value, where some data that will be used to idenify this archive in future should be stored
-* \param[in] local_path Local file system to archive
-* \return error code
-*/
-FLEXARCH_PLUGIN_API(Archive_Open)(archive_handle *archive, char *local_path);
-
-/**
-* \brief Creating new archive
-* \param[out] archive Pointer-size value, where some data that will be used to idenify this archive in future should be stored
-* \param[in] local_path Local file system path where archive should be placed
-* \param[in] flags TBD
-* \return error code
-*/
-FLEXARCH_PLUGIN_API(Archive_Create)(archive_handle *archive, char *local_path, char *flags);
-
-/**
-* \brief If anything cached - data should be saved to disk after this call
-* \param[in] archive Archive handle, created by Archive_Open or Archive_Create
-* \return error code
-*/
-FLEXARCH_PLUGIN_API(Archive_Save)(archive_handle archive);
-
-/**
-* \brief Closing archive. All unsaved changes should be saved and file should be closed, after this call archive handle become invalid.
-* \param[in] archive Archive handle, created by Archive_Open or Archive_Create
-* \return error code
-*/
-FLEXARCH_PLUGIN_API(Archive_Close)(archive_handle archive);
-
-/**
-* \brief Adding file from local FS to archive
-* \param[in] archive Archive handle, created by Archive_Open or Archive_Create
-* \param[in] local_path path of local file system file to add
-* \param[in] archive_item node in archive to be created. Fields `id` and `size_in_archive` is uninitialized before call, field `id` *should* be initialized after call
-* \return error code
-*/
-FLEXARCH_PLUGIN_API(Archive_AddFileLocal)(archive_handle archive, archive_entry* archive_item, char* local_path);
+    /**
+    * \brief Returns user-readable plugin description
+    * \return User-readable plugin description
+    */
+    FLEXARCH_PLUGIN_API_STRING(Plugin_Description)();
 
 
-/**
-* \brief Removing file, directory, or directory tree from archive
-* \param[in] archive Archive handle, created by Archive_Open or Archive_Create
-* \param[in] archive_item path to file or directory. If directory not empty - entire tree should be deleted
-* \return error code
-*/
-FLEXARCH_PLUGIN_API(Archive_RemoveEntry)(archive_handle archive, archive_entry* archive_item);
+    /**
+    * \brief Return error description by user-defined error code (see rule 5)
+    * \param[in] error_code error code to get description for
+    * \param[in] reserved do not use, set to 0
+    * \return error description
+    */
+    FLEXARCH_PLUGIN_API_STRING(Plugin_ErrorCodeDescription)(FlexArchResult error_code, uint16_t reserved);
 
-/**
-* \brief
-* \param[in] archive Archive handle, created by Archive_Open or Archive_Create
-* \param[in] archive_path Fields `id` and `size_in_archive` is uninitialized before call, field `id` *should* be initialized after call
-* \return error code
-*/
-FLEXARCH_PLUGIN_API(Archive_CreateDirectory)(archive_handle archive, archive_entry* archive_path);
+    /**
+    * \brief Opens existing archive
+    * \param[out] archive Pointer-size value, where some data that will be used to idenify this archive in future should be stored
+    * \param[in] local_path Local file system to archive
+    * \return error code
+    */
+    FLEXARCH_PLUGIN_API(Archive_Open)(archive_handle* archive, char* local_path);
 
-/**
-* \brief 
-* \param[in] archive Archive handle, created by Archive_Open or Archive_Create
-* \param[in] context Enumeration context, should be passed to callback every call
-* \param[in] callback callback to be used for enumeration. archive should be always same as passed to Archive_EnumerateEntries, entry is current item node (super_name buffer can be freed after callback call) and should be NULL for empty archive, last item *should* be set to non-zero for last call and *shoud* be set to zero for any other call.
-* \return error code
-*/
-FLEXARCH_PLUGIN_API(Archive_EnumerateEntries)(archive_handle archive, void *context, archive_enumerate_callback callback);
+    /**
+    * \brief Creating new archive
+    * \param[out] archive Pointer-size value, where some data that will be used to idenify this archive in future should be stored
+    * \param[in] local_path Local file system path where archive should be placed
+    * \param[in] flags TBD
+    * \return error code
+    */
+    FLEXARCH_PLUGIN_API(Archive_Create)(archive_handle* archive, char* local_path, char* flags);
 
-/**
-* \brief
-* \param[in] archive Archive handle, created by Archive_Open or Archive_Create
-* \param[in] local_dir_path path to local directory where files should be extracted
-* \param[in] archive_item array of items to be extracted
-* \param[in] archive_item_count count of `archive_item` array
-* \return error code
-*/
-FLEXARCH_PLUGIN_API(Archive_ExtractFiles)(archive_handle archive, char* local_dir_path, archive_entry* archive_item, uint64_t archive_item_count);
+    /**
+    * \brief If anything cached - data should be saved to disk after this call
+    * \param[in] archive Archive handle, created by Archive_Open or Archive_Create
+    * \return error code
+    */
+    FLEXARCH_PLUGIN_API(Archive_Save)(archive_handle archive);
 
-/**
-* \brief
-* \param[in] callback callback function that highly recommended to call while processing large amounts of data
-* \return error code
-*/
-FLEXARCH_PLUGIN_API(Archive_RegisterStatusCallback)(status_callback callback);
+    /**
+    * \brief Closing archive. All unsaved changes should be saved and file should be closed, after this call archive handle become invalid.
+    * \param[in] archive Archive handle, created by Archive_Open or Archive_Create
+    * \return error code
+    */
+    FLEXARCH_PLUGIN_API(Archive_Close)(archive_handle archive);
 
-/**
-* \brief
-* \param[in] archive Archive handle, created by Archive_Open or Archive_Create
-* \param[inout] archive_item pointer to archive_entry to be filled with info. Before calling only `id` field valid. If `super_name` initialized - caller should free memory
-* \return error code
-*/
-FLEXARCH_PLUGIN_API(Archive_GetEntryInfo)(archive_handle archive, archive_entry* archive_item);
+    /**
+    * \brief Adding file from local FS to archive
+    * \param[in] archive Archive handle, created by Archive_Open or Archive_Create
+    * \param[in] local_path path of local file system file to add
+    * \param[in] archive_item node in archive to be created. Fields `id` and `size_in_archive` is uninitialized before call, field `id` *should* be initialized after call
+    * \return error code
+    */
+    FLEXARCH_PLUGIN_API(Archive_AddFileLocal)(archive_handle archive, archive_entry* archive_item, char* local_path);
+
+
+    /**
+    * \brief Removing file, directory, or directory tree from archive
+    * \param[in] archive Archive handle, created by Archive_Open or Archive_Create
+    * \param[in] archive_item path to file or directory. If directory not empty - entire tree should be deleted
+    * \return error code
+    */
+    FLEXARCH_PLUGIN_API(Archive_RemoveEntry)(archive_handle archive, archive_entry* archive_item);
+
+    /**
+    * \brief
+    * \param[in] archive Archive handle, created by Archive_Open or Archive_Create
+    * \param[in] archive_path Fields `id` and `size_in_archive` is uninitialized before call, field `id` *should* be initialized after call
+    * \return error code
+    */
+    FLEXARCH_PLUGIN_API(Archive_CreateDirectory)(archive_handle archive, archive_entry* archive_path);
+
+    /**
+    * \brief
+    * \param[in] archive Archive handle, created by Archive_Open or Archive_Create
+    * \param[in] context Enumeration context, should be passed to callback every call
+    * \param[in] callback callback to be used for enumeration. archive should be always same as passed to Archive_EnumerateEntries, entry is current item node (super_name buffer can be freed after callback call) and should be NULL for empty archive, last item *should* be set to non-zero for last call and *shoud* be set to zero for any other call.
+    * \return error code
+    */
+    FLEXARCH_PLUGIN_API(Archive_EnumerateEntries)(archive_handle archive, void* context, archive_enumerate_callback callback);
+
+    /**
+    * \brief
+    * \param[in] archive Archive handle, created by Archive_Open or Archive_Create
+    * \param[in] local_dir_path path to local directory where files should be extracted
+    * \param[in] archive_item array of items to be extracted
+    * \param[in] archive_item_count count of `archive_item` array
+    * \return error code
+    */
+    FLEXARCH_PLUGIN_API(Archive_ExtractFiles)(archive_handle archive, char* local_dir_path, archive_entry* archive_item, uint64_t archive_item_count);
+
+    /**
+    * \brief
+    * \param[in] callback callback function that highly recommended to call while processing large amounts of data
+    * \return error code
+    */
+    FLEXARCH_PLUGIN_API(Archive_RegisterStatusCallback)(status_callback callback);
+
+    /**
+    * \brief
+    * \param[in] archive Archive handle, created by Archive_Open or Archive_Create
+    * \param[inout] archive_item pointer to archive_entry to be filled with info. Before calling only `id` field valid. If `super_name` initialized - caller should free memory
+    * \return error code
+    */
+    FLEXARCH_PLUGIN_API(Archive_GetEntryInfo)(archive_handle archive, archive_entry* archive_item);
 
 #if 0
-//RESERVED FOR FUTURE DEVELOPMENT
-/**
-* \brief
-* \param[in] archive Archive handle, created by Archive_Open or Archive_Create
-* \param[in] metadata_index index of metadata, implementation-defined or FA_METADATA
-* \param[in] buffer_data metadata buffer
-* \param[in] buffer_size metadata buffer size
-* \return error code
-*/
-FLEXARCH_PLUGIN_API(Archive_AddArchiveMetadata)(archive_handle archive, uint32_t metadata_index, uint8_t* buffer_data, uint64_t buffer_size);
+    //RESERVED FOR FUTURE DEVELOPMENT
+    /**
+    * \brief
+    * \param[in] archive Archive handle, created by Archive_Open or Archive_Create
+    * \param[in] metadata_index index of metadata, implementation-defined or FA_METADATA
+    * \param[in] buffer_data metadata buffer
+    * \param[in] buffer_size metadata buffer size
+    * \return error code
+    */
+    FLEXARCH_PLUGIN_API(Archive_AddArchiveMetadata)(archive_handle archive, uint32_t metadata_index, uint8_t* buffer_data, uint64_t buffer_size);
 
-/**
-* 
-*/
-FLEXARCH_PLUGIN_API(Archive_GetPossibleArchiveMetadataList)();
+    /**
+    *
+    */
+    FLEXARCH_PLUGIN_API(Archive_GetPossibleArchiveMetadataList)();
 
-/**
-*
-*/
-FLEXARCH_PLUGIN_API(Archive_GetPossibleNodeMetadataList)();
+    /**
+    *
+    */
+    FLEXARCH_PLUGIN_API(Archive_GetPossibleNodeMetadataList)();
 
 
-/**
-* \brief TBD
-*/
-FLEXARCH_PLUGIN_API_STRING(Plugin_GetFilenameFilters)();
+    /**
+    * \brief TBD
+    */
+    FLEXARCH_PLUGIN_API_STRING(Plugin_GetFilenameFilters)();
 
-/**
-* \brief
-* \param[in] archive Archive handle, created by Archive_Open or Archive_Create
-* \param[in] archive_item node in archive
-* \param[in] reader callback used to get data
-* \return error code
-*/
-FLEXARCH_PLUGIN_API(Archive_GetFileBuffer)(archive_handle archive, archive_entry *archive_item, reader_callback reader);
+    /**
+    * \brief
+    * \param[in] archive Archive handle, created by Archive_Open or Archive_Create
+    * \param[in] archive_item node in archive
+    * \param[in] reader callback used to get data
+    * \return error code
+    */
+    FLEXARCH_PLUGIN_API(Archive_GetFileBuffer)(archive_handle archive, archive_entry* archive_item, reader_callback reader);
 
-/**
-* \brief
-* \param[in] archive Archive handle, created by Archive_Open or Archive_Create
-* \param[inout] archive_item node in archive to be created. Field `name` is initialized before call, field `id` *should* be initialized after call
-* \param[out] reader reader which will receive binary data for entry
-* \return error code
-*/
-FLEXARCH_PLUGIN_API(Archive_AddFileBuffer)(archive_handle archive, archive_entry* archive_item, reader_callback *reader);
+    /**
+    * \brief
+    * \param[in] archive Archive handle, created by Archive_Open or Archive_Create
+    * \param[inout] archive_item node in archive to be created. Field `name` is initialized before call, field `id` *should* be initialized after call
+    * \param[out] reader reader which will receive binary data for entry
+    * \return error code
+    */
+    FLEXARCH_PLUGIN_API(Archive_AddFileBuffer)(archive_handle archive, archive_entry* archive_item, reader_callback* reader);
 
+#endif
+
+#if defined(__cplusplus) && !defined(FLEXARCH_INTERNAL)
+}
 #endif
 
 

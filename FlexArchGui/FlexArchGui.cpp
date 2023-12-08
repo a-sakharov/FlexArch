@@ -1,9 +1,10 @@
-#include <stdio.h>
-#include <FlexArchBase/plugin.h>
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif
+#include <stdio.h>
+#include <FlexArchBase/plugin.h>
+#include <FlexArchBase/FlexArchInternals.h>
 
 #ifdef _WIN32
 

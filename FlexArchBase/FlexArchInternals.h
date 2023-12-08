@@ -13,6 +13,9 @@
 #define MAX_PATH PATH_MAX
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 struct PluginFunctionsCollection_t
 {
     Plugin_GetName                  Plugin_GetName;
@@ -41,6 +44,10 @@ struct PluginFunctionsCollection_t
 };
 typedef struct PluginFunctionsCollection_t PluginFunctionsCollection;
 
+#ifdef __cplusplus
+}
+#endif
+
 struct opened_archive_t
 {
     archive_handle handle;
@@ -52,11 +59,19 @@ typedef struct opened_archive_t opened_archive;
 extern PluginFunctionsCollection* LoadedPlugins;
 extern size_t LoadedPluginsCount;
 
-void FlexArch_CollectPlugins();
-void FlexArch_FreePlugins();
-bool FlexArch_TryOpenArchive(opened_archive* arch, char* path);
-const char* FlexArch_GetErrorDescription(FlexArchResult error_code);
-void FlexArch_FormatSizeHumanly(char* str, size_t chars, uint64_t size);
-char* FlexArch_CreateFullPath(opened_archive *arch, archive_entry *entry);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+    void FlexArch_CollectPlugins();
+    void FlexArch_FreePlugins();
+    bool FlexArch_TryOpenArchive(opened_archive* arch, char* path);
+    const char* FlexArch_GetErrorDescription(FlexArchResult error_code);
+    void FlexArch_FormatSizeHumanly(char* str, size_t chars, uint64_t size);
+    char* FlexArch_CreateFullPath(opened_archive* arch, archive_entry* entry);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

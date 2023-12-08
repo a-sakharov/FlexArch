@@ -27,14 +27,14 @@ FlexArchGui/FlexArchGui: FlexArchBase/libFlexArchBase.a
 #	make -C $@
 
 install: all $(install_plugins)
-	-mkdir $(INSTALL_PATH)
+	-mkdir $(INSTALL_PATH) 2> /dev/null
 	cp FlexArchCl/FlexArchCl $(INSTALL_PATH)
 	cp FlexArchGui/FlexArchGui $(INSTALL_PATH)
 
 $(PLUGIN_OUT): $(make_plugins)
 
 $(install_plugins): $(PLUGIN_OUT)
-	-mkdir $(INSTALL_PATH)
+	-mkdir $(INSTALL_PATH) 2> /dev/null
 	cp $(patsubst install_%,%,$@)/$(patsubst install_%,%,$@).so $(INSTALL_PATH)
     
 $(make_plugins):

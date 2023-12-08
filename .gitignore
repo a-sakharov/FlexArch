@@ -7,4 +7,8 @@ Release/**
 */x64/**
 all_my_passwords.txt
 *.o
+*.a
 *.so
+/install/**
+FlexArchCl/FlexArchCl
+FlexArchGui/FlexArchGui
