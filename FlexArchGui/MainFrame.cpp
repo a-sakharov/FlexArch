@@ -7,7 +7,6 @@
 
 #include "MainFrame.h"
 
-
 #include "res/open.png.h"
 #include "res/open_current.png.h"
 #include "res/open_focus.png.h"
