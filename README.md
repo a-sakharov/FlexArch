@@ -1,4 +1,4 @@
-[![C/C++ CI](https://github.com/a-sakharov/FlexArch/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/a-sakharov/FlexArch/actions/workflows/c-cpp.yml)
+[![C/C++ CI](https://github.com/a-sakharov/FlexArch/actions/workflows/c-cpp%20commit%20check.yml/badge.svg)](https://github.com/a-sakharov/FlexArch/actions/workflows/c-cpp%20commit%20check.yml)
 
 **FlexArch**
 
