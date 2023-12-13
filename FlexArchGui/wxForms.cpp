@@ -5,7 +5,7 @@
 // PLEASE DO *NOT* EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
-#include "MainFrame.h"
+#include "wxForms.h"
 
 #include "res/open.png.h"
 #include "res/open_current.png.h"
@@ -57,6 +57,17 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 
 	m_menubar->Append( file, wxT("File") );
 
+	help = new wxMenu();
+	wxMenuItem* loadedPlugins;
+	loadedPlugins = new wxMenuItem( help, ID_LOADED_PLUGINS, wxString( wxT("Loaded plugins") ) , wxEmptyString, wxITEM_NORMAL );
+	help->Append( loadedPlugins );
+
+	wxMenuItem* about;
+	about = new wxMenuItem( help, ID_ABOUT, wxString( wxT("About") ) , wxEmptyString, wxITEM_NORMAL );
+	help->Append( about );
+
+	m_menubar->Append( help, wxT("Help") );
+
 	this->SetMenuBar( m_menubar );
 
 	wxBoxSizer* bMainSizer;
@@ -73,5 +84,26 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 }
 
 MainFrame::~MainFrame()
+{
+}
+
+PluginListDialog::PluginListDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* bMainSizer;
+	bMainSizer = new wxBoxSizer( wxVERTICAL );
+
+	m_listBox_pluginList = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	bMainSizer->Add( m_listBox_pluginList, 1, wxALL|wxEXPAND, 5 );
+
+
+	this->SetSizer( bMainSizer );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+}
+
+PluginListDialog::~PluginListDialog()
 {
 }

@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <FlexArchBase/plugin.h>
 #include <FlexArchBase/FlexArchInternals.h>
-#include "MainFrame.h"
+#include "wxForms.h"
 
 #ifdef _WIN32
 

@@ -25,6 +25,8 @@
 #include <wx/listctrl.h>
 #include <wx/sizer.h>
 #include <wx/frame.h>
+#include <wx/listbox.h>
+#include <wx/dialog.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -40,7 +42,9 @@ class MainFrame : public wxFrame
 		{
 			ID_SAVE = 1000,
 			ID_CLOSE,
-			ID_EXIT
+			ID_EXIT,
+			ID_LOADED_PLUGINS,
+			ID_ABOUT
 		};
 
 		wxStatusBar* m_statusBar;
@@ -50,6 +54,7 @@ class MainFrame : public wxFrame
 		wxBitmapButton* m_bpButton_close;
 		wxMenuBar* m_menubar;
 		wxMenu* file;
+		wxMenu* help;
 		wxListCtrl* m_listCtrl_archiveData;
 
 	public:
@@ -57,6 +62,24 @@ class MainFrame : public wxFrame
 		MainFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("FlexArch"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 936,675 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
 		~MainFrame();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class PluginListDialog
+///////////////////////////////////////////////////////////////////////////////
+class PluginListDialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxListBox* m_listBox_pluginList;
+
+	public:
+
+		PluginListDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 297,224 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~PluginListDialog();
 
 };
 

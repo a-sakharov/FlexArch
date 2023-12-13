@@ -10,7 +10,7 @@ LDFLAGS :=  -L../FlexArchBase -lFlexArchBase
 
 CXXFLAGS := -I.. -DFLEXARCH_INTERNAL
 
-OBJECTS := FlexArchGui.o MainFrame.o
+OBJECTS := FlexArchGui.o wxForms.o
 
 FlexArchGui: $(OBJECTS)
 	$(CXX) -o $@ $(OBJECTS) $(LDFLAGS) $(WX_LIBS) $(LIBS)

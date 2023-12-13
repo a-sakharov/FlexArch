@@ -15,15 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="MainFrame.cpp">
+    <ClCompile Include="FlexArchGui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FlexArchGui.cpp">
+    <ClCompile Include="wxForms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MainFrame.h">
+    <ClInclude Include="wxForms.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
