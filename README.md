@@ -1,3 +1,5 @@
+[![C/C++ CI](https://github.com/a-sakharov/FlexArch/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/a-sakharov/FlexArch/actions/workflows/c-cpp.yml)
+
 **FlexArch**
 
 An attemp to describe universal archive/fs interface and implement sample applications using it.
