@@ -10,6 +10,7 @@
 #include "res/books.png.h"
 #include "res/cross_mark.png.h"
 #include "res/download.png.h"
+#include "res/inbox.png.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -33,8 +34,10 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	m_toolBar->AddControl( m_bpButton_ArchiveClose );
 	m_staticline1 = new wxStaticLine( m_toolBar, wxID_ANY, wxDefaultPosition, wxSize( -1,30 ), wxLI_VERTICAL );
 	m_toolBar->AddControl( m_staticline1 );
-	m_bpButton4 = new wxBitmapButton( m_toolBar, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
-	m_toolBar->AddControl( m_bpButton4 );
+	m_bpButton_FileExtract = new wxBitmapButton( m_toolBar, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|wxBORDER_NONE );
+
+	m_bpButton_FileExtract->SetBitmap( inbox_png_to_wx_bitmap() );
+	m_toolBar->AddControl( m_bpButton_FileExtract );
 	m_toolBar->Realize();
 
 	m_menubar = new wxMenuBar( 0 );
@@ -68,6 +71,18 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 
 	m_menubar->Append( archive, wxT("Archive") );
 
+	file = new wxMenu();
+	wxMenuItem* FileExtract;
+	FileExtract = new wxMenuItem( file, wxID_ANY, wxString( wxT("Extract") ) , wxEmptyString, wxITEM_NORMAL );
+	#ifdef __WXMSW__
+	FileExtract->SetBitmaps( inbox_png_to_wx_bitmap() );
+	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
+	FileExtract->SetBitmap( inbox_png_to_wx_bitmap() );
+	#endif
+	file->Append( FileExtract );
+
+	m_menubar->Append( file, wxT("File") );
+
 	help = new wxMenu();
 	wxMenuItem* loadedPlugins;
 	loadedPlugins = new wxMenuItem( help, ID_LOADED_PLUGINS, wxString( wxT("Loaded plugins") ) , wxEmptyString, wxITEM_NORMAL );
@@ -97,9 +112,13 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	m_bpButton_ArchiveOpen->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveOpen ), NULL, this );
 	m_bpButton_ArchiveSave->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveSave ), NULL, this );
 	m_bpButton_ArchiveClose->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveClose ), NULL, this );
+	m_bpButton_FileExtract->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::FileExtract ), NULL, this );
 	archive->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::ArchiveOpen ), this, open->GetId());
 	archive->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::ArchiveSave ), this, save->GetId());
 	archive->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::ArchiveClose ), this, close->GetId());
+	file->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::FileExtract ), this, FileExtract->GetId());
+	help->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::HelpLoadedPlugings ), this, loadedPlugins->GetId());
+	help->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::HelpAbout ), this, about->GetId());
 }
 
 MainFrame::~MainFrame()
@@ -108,6 +127,7 @@ MainFrame::~MainFrame()
 	m_bpButton_ArchiveOpen->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveOpen ), NULL, this );
 	m_bpButton_ArchiveSave->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveSave ), NULL, this );
 	m_bpButton_ArchiveClose->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveClose ), NULL, this );
+	m_bpButton_FileExtract->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::FileExtract ), NULL, this );
 
 }
 
@@ -118,16 +138,22 @@ PluginListDialog::PluginListDialog( wxWindow* parent, wxWindowID id, const wxStr
 	wxBoxSizer* bMainSizer;
 	bMainSizer = new wxBoxSizer( wxVERTICAL );
 
-	m_listBox_pluginList = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
-	bMainSizer->Add( m_listBox_pluginList, 1, wxALL|wxEXPAND, 5 );
+	m_listCtrl_PluginList = new wxListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT );
+	bMainSizer->Add( m_listCtrl_PluginList, 1, wxALL|wxEXPAND, 5 );
 
 
 	this->SetSizer( bMainSizer );
 	this->Layout();
 
 	this->Centre( wxBOTH );
+
+	// Connect Events
+	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( PluginListDialog::DialogClose ) );
 }
 
 PluginListDialog::~PluginListDialog()
 {
+	// Disconnect Events
+	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( PluginListDialog::DialogClose ) );
+
 }

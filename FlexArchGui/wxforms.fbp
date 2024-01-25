@@ -460,7 +460,7 @@
           <property name="resize">Resizable</property>
           <property name="show">1</property>
           <property name="size"></property>
-          <property name="style"></property>
+          <property name="style">wxBORDER_NONE</property>
           <property name="subclass">; ; forward_declare</property>
           <property name="toolbar_pane">0</property>
           <property name="tooltip"></property>
@@ -471,6 +471,7 @@
           <property name="window_extra_style"></property>
           <property name="window_name"></property>
           <property name="window_style"></property>
+          <event name="OnButtonClick">FileExtract</event>
         </object>
       </object>
       <object class="wxMenuBar" expanded="true">
@@ -543,6 +544,25 @@
           </object>
         </object>
         <object class="wxMenu" expanded="true">
+          <property name="label">File</property>
+          <property name="name">file</property>
+          <property name="permission">protected</property>
+          <object class="wxMenuItem" expanded="true">
+            <property name="bitmap">Load From Embedded File; res/inbox.png</property>
+            <property name="checked">0</property>
+            <property name="enabled">1</property>
+            <property name="help"></property>
+            <property name="id">wxID_ANY</property>
+            <property name="kind">wxITEM_NORMAL</property>
+            <property name="label">Extract</property>
+            <property name="name">FileExtract</property>
+            <property name="permission">none</property>
+            <property name="shortcut"></property>
+            <property name="unchecked_bitmap"></property>
+            <event name="OnMenuSelection">FileExtract</event>
+          </object>
+        </object>
+        <object class="wxMenu" expanded="true">
           <property name="label">Help</property>
           <property name="name">help</property>
           <property name="permission">protected</property>
@@ -558,6 +578,7 @@
             <property name="permission">none</property>
             <property name="shortcut"></property>
             <property name="unchecked_bitmap"></property>
+            <event name="OnMenuSelection">HelpLoadedPlugings</event>
           </object>
           <object class="wxMenuItem" expanded="false">
             <property name="bitmap"></property>
@@ -571,6 +592,7 @@
             <property name="permission">none</property>
             <property name="shortcut"></property>
             <property name="unchecked_bitmap"></property>
+            <event name="OnMenuSelection">HelpAbout</event>
           </object>
         </object>
       </object>
@@ -644,7 +666,7 @@
         </object>
       </object>
     </object>
-    <object class="Dialog" expanded="false">
+    <object class="Dialog" expanded="true">
       <property name="aui_managed">0</property>
       <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
       <property name="bg"></property>
@@ -663,7 +685,7 @@
       <property name="minimum_size"></property>
       <property name="name">PluginListDialog</property>
       <property name="pos"></property>
-      <property name="size">297,224</property>
+      <property name="size">362,274</property>
       <property name="style">wxDEFAULT_DIALOG_STYLE</property>
       <property name="subclass">; ; forward_declare</property>
       <property name="title"></property>
@@ -672,16 +694,17 @@
       <property name="window_extra_style"></property>
       <property name="window_name"></property>
       <property name="window_style"></property>
-      <object class="wxBoxSizer" expanded="false">
+      <event name="OnClose">DialogClose</event>
+      <object class="wxBoxSizer" expanded="true">
         <property name="minimum_size"></property>
         <property name="name">bMainSizer</property>
         <property name="orient">wxVERTICAL</property>
         <property name="permission">none</property>
-        <object class="sizeritem" expanded="false">
+        <object class="sizeritem" expanded="true">
           <property name="border">5</property>
           <property name="flag">wxALL|wxEXPAND</property>
           <property name="proportion">1</property>
-          <object class="wxListBox" expanded="false">
+          <object class="wxListCtrl" expanded="true">
             <property name="BottomDockable">1</property>
             <property name="LeftDockable">1</property>
             <property name="RightDockable">1</property>
@@ -695,7 +718,6 @@
             <property name="caption"></property>
             <property name="caption_visible">1</property>
             <property name="center_pane">0</property>
-            <property name="choices"></property>
             <property name="close_button">1</property>
             <property name="context_help"></property>
             <property name="context_menu">1</property>
@@ -718,7 +740,7 @@
             <property name="minimize_button">0</property>
             <property name="minimum_size"></property>
             <property name="moveable">1</property>
-            <property name="name">m_listBox_pluginList</property>
+            <property name="name">m_listCtrl_PluginList</property>
             <property name="pane_border">1</property>
             <property name="pane_position"></property>
             <property name="pane_size"></property>
@@ -728,7 +750,7 @@
             <property name="resize">Resizable</property>
             <property name="show">1</property>
             <property name="size"></property>
-            <property name="style"></property>
+            <property name="style">wxLC_REPORT</property>
             <property name="subclass">; ; forward_declare</property>
             <property name="toolbar_pane">0</property>
             <property name="tooltip"></property>

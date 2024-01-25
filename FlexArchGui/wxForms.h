@@ -26,7 +26,6 @@
 #include <wx/listctrl.h>
 #include <wx/sizer.h>
 #include <wx/frame.h>
-#include <wx/listbox.h>
 #include <wx/dialog.h>
 
 ///////////////////////////////////////////////////////////////////////////
@@ -53,9 +52,10 @@ class MainFrame : public wxFrame
 		wxBitmapButton* m_bpButton_ArchiveSave;
 		wxBitmapButton* m_bpButton_ArchiveClose;
 		wxStaticLine* m_staticline1;
-		wxBitmapButton* m_bpButton4;
+		wxBitmapButton* m_bpButton_FileExtract;
 		wxMenuBar* m_menubar;
 		wxMenu* archive;
+		wxMenu* file;
 		wxMenu* help;
 		wxListCtrl* m_listCtrl_archiveData;
 
@@ -63,6 +63,9 @@ class MainFrame : public wxFrame
 		virtual void ArchiveOpen( wxCommandEvent& event ) { event.Skip(); }
 		virtual void ArchiveSave( wxCommandEvent& event ) { event.Skip(); }
 		virtual void ArchiveClose( wxCommandEvent& event ) { event.Skip(); }
+		virtual void FileExtract( wxCommandEvent& event ) { event.Skip(); }
+		virtual void HelpLoadedPlugings( wxCommandEvent& event ) { event.Skip(); }
+		virtual void HelpAbout( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:
@@ -81,11 +84,15 @@ class PluginListDialog : public wxDialog
 	private:
 
 	protected:
-		wxListBox* m_listBox_pluginList;
+		wxListCtrl* m_listCtrl_PluginList;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void DialogClose( wxCloseEvent& event ) { event.Skip(); }
+
 
 	public:
 
-		PluginListDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 297,224 ), long style = wxDEFAULT_DIALOG_STYLE );
+		PluginListDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 362,274 ), long style = wxDEFAULT_DIALOG_STYLE );
 
 		~PluginListDialog();
 

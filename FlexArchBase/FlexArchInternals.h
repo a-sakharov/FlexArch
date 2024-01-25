@@ -56,12 +56,13 @@ struct opened_archive_t
 };
 typedef struct opened_archive_t opened_archive;
 
-extern PluginFunctionsCollection* LoadedPlugins;
-extern size_t LoadedPluginsCount;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+    extern PluginFunctionsCollection* LoadedPlugins;
+    extern size_t LoadedPluginsCount;
 
     void FlexArch_CollectPlugins();
     void FlexArch_FreePlugins();

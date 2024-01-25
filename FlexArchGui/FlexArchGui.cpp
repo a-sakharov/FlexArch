@@ -41,36 +41,93 @@ public:
 
 wxIMPLEMENT_APP(MyApp);
 
-class MainFrameImplementation : public MainFrame
+class PluginListDialogImplementation : public PluginListDialog
 {
-public:
-    MainFrameImplementation() : MainFrame(NULL)
-    {
+private:
+    wxWindow* m_parent;
 
+    void DialogClose(wxCloseEvent& event)
+    {
+        m_parent->Enable(true);
+        event.Skip();
     }
 
+public:
+    PluginListDialogImplementation(wxWindow* parent) : PluginListDialog(parent)
+    {
+        m_parent = parent;
+
+        m_parent->Enable(false);
+        
+        m_listCtrl_PluginList->InsertColumn(0, "Name");
+        m_listCtrl_PluginList->InsertColumn(1, "Description");
+
+        for (size_t i = 0; i < LoadedPluginsCount; ++i)
+        {
+            m_listCtrl_PluginList->InsertItem(i, "");
+            m_listCtrl_PluginList->SetItem(i, 0, LoadedPlugins[i].Plugin_GetName());
+            m_listCtrl_PluginList->SetItem(i, 1, LoadedPlugins[i].Plugin_Description());
+        }
+    }
+
+    ~PluginListDialogImplementation()
+    {
+    }
+};
+
+class MainFrameImplementation : public MainFrame
+{
 private:
-    void ArchiveOpen(wxCommandEvent& event) 
+    void ArchiveOpen(wxCommandEvent& event)
     {
         event.Skip();
     }
 
-    void ArchiveSave(wxCommandEvent& event) 
+    void ArchiveSave(wxCommandEvent& event)
     {
-        event.Skip(); 
+        event.Skip();
     }
 
-    void ArchiveClose(wxCommandEvent& event) 
+    void ArchiveClose(wxCommandEvent& event)
     {
-        event.Skip(); 
+        event.Skip();
+    }
+
+    void FileExtract(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+
+    void HelpLoadedPlugings(wxCommandEvent& event)
+    {
+        PluginListDialogImplementation* pl = new PluginListDialogImplementation(this);
+
+        pl->Show();
+    }
+
+    void HelpAbout(wxCommandEvent& event)
+    {
+        event.Skip();
+    }
+
+public:
+    MainFrameImplementation(wxWindow* parent) : MainFrame(parent)
+    {
+
+    }
+
+    ~MainFrameImplementation()
+    {
     }
 };
+
 
 bool MyApp::OnInit()
 {
     wxInitAllImageHandlers();
+    FlexArch_CollectPlugins();
 
-    MainFrameImplementation* frame = new MainFrameImplementation();
+    MainFrameImplementation* frame = new MainFrameImplementation(NULL);
     frame->Show(true);
     return true;
 }
