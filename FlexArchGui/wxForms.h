@@ -20,6 +20,7 @@
 #include <wx/image.h>
 #include <wx/icon.h>
 #include <wx/button.h>
+#include <wx/statline.h>
 #include <wx/toolbar.h>
 #include <wx/menu.h>
 #include <wx/listctrl.h>
@@ -42,20 +43,27 @@ class MainFrame : public wxFrame
 		{
 			ID_SAVE = 1000,
 			ID_CLOSE,
-			ID_EXIT,
 			ID_LOADED_PLUGINS,
 			ID_ABOUT
 		};
 
 		wxStatusBar* m_statusBar;
 		wxToolBar* m_toolBar;
-		wxBitmapButton* m_bpButton_open;
-		wxBitmapButton* m_bpButton_save;
-		wxBitmapButton* m_bpButton_close;
+		wxBitmapButton* m_bpButton_ArchiveOpen;
+		wxBitmapButton* m_bpButton_ArchiveSave;
+		wxBitmapButton* m_bpButton_ArchiveClose;
+		wxStaticLine* m_staticline1;
+		wxBitmapButton* m_bpButton4;
 		wxMenuBar* m_menubar;
-		wxMenu* file;
+		wxMenu* archive;
 		wxMenu* help;
 		wxListCtrl* m_listCtrl_archiveData;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void ArchiveOpen( wxCommandEvent& event ) { event.Skip(); }
+		virtual void ArchiveSave( wxCommandEvent& event ) { event.Skip(); }
+		virtual void ArchiveClose( wxCommandEvent& event ) { event.Skip(); }
+
 
 	public:
 

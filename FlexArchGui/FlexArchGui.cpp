@@ -41,11 +41,37 @@ public:
 
 wxIMPLEMENT_APP(MyApp);
 
+class MainFrameImplementation : public MainFrame
+{
+public:
+    MainFrameImplementation() : MainFrame(NULL)
+    {
+
+    }
+
+private:
+    void ArchiveOpen(wxCommandEvent& event) 
+    {
+        event.Skip();
+    }
+
+    void ArchiveSave(wxCommandEvent& event) 
+    {
+        event.Skip(); 
+    }
+
+    void ArchiveClose(wxCommandEvent& event) 
+    {
+        event.Skip(); 
+    }
+};
+
 bool MyApp::OnInit()
 {
     wxInitAllImageHandlers();
 
-    MainFrame* frame = new MainFrame(NULL);
+    MainFrameImplementation* frame = new MainFrameImplementation();
     frame->Show(true);
     return true;
 }
+
