@@ -23,10 +23,12 @@
 #include <wx/statline.h>
 #include <wx/toolbar.h>
 #include <wx/menu.h>
+#include <wx/treectrl.h>
 #include <wx/listctrl.h>
 #include <wx/sizer.h>
 #include <wx/frame.h>
 #include <wx/dialog.h>
+#include <wx/stattext.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -40,8 +42,12 @@ class MainFrame : public wxFrame
 	protected:
 		enum
 		{
-			ID_SAVE = 1000,
-			ID_CLOSE,
+			ID_MENU_ARCHIVE_OPEN = 1000,
+			ID_MENU_ARCHIVE_SAVE,
+			ID_MENU_ARCHIVE_CLOSE,
+			ID_MENU_FILE_EXTRACT,
+			ID_NEW_FILE,
+			ID_NEW_DIRECTORY,
 			ID_LOADED_PLUGINS,
 			ID_ABOUT
 		};
@@ -54,9 +60,10 @@ class MainFrame : public wxFrame
 		wxStaticLine* m_staticline1;
 		wxBitmapButton* m_bpButton_FileExtract;
 		wxMenuBar* m_menubar;
-		wxMenu* archive;
-		wxMenu* file;
-		wxMenu* help;
+		wxMenu* m_menu_archive;
+		wxMenu* m_menu_file;
+		wxMenu* m_menu_help;
+		wxTreeCtrl* m_treeCtrl_archiveData;
 		wxListCtrl* m_listCtrl_archiveData;
 
 		// Virtual event handlers, override them in your derived class
@@ -66,6 +73,7 @@ class MainFrame : public wxFrame
 		virtual void FileExtract( wxCommandEvent& event ) { event.Skip(); }
 		virtual void HelpLoadedPlugings( wxCommandEvent& event ) { event.Skip(); }
 		virtual void HelpAbout( wxCommandEvent& event ) { event.Skip(); }
+		virtual void TreeSelectedNewItem( wxTreeEvent& event ) { event.Skip(); }
 
 
 	public:
@@ -92,9 +100,32 @@ class PluginListDialog : public wxDialog
 
 	public:
 
-		PluginListDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 362,274 ), long style = wxDEFAULT_DIALOG_STYLE );
+		PluginListDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Loaded plugins"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,350 ), long style = wxDEFAULT_DIALOG_STYLE );
 
 		~PluginListDialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class AboutDialog
+///////////////////////////////////////////////////////////////////////////////
+class AboutDialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText1;
+		wxStaticText* m_staticText2;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void DialogClose( wxCloseEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		AboutDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("About"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 256,107 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~AboutDialog();
 
 };
 

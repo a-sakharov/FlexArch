@@ -10,7 +10,9 @@
 #include "res/books.png.h"
 #include "res/cross_mark.png.h"
 #include "res/download.png.h"
+#include "res/file.png.h"
 #include "res/inbox.png.h"
+#include "res/open_folder.png.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -41,65 +43,86 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	m_toolBar->Realize();
 
 	m_menubar = new wxMenuBar( 0 );
-	archive = new wxMenu();
-	wxMenuItem* open;
-	open = new wxMenuItem( archive, wxID_ANY, wxString( wxT("Open") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu_archive = new wxMenu();
+	wxMenuItem* m_menu_archive_open;
+	m_menu_archive_open = new wxMenuItem( m_menu_archive, ID_MENU_ARCHIVE_OPEN, wxString( wxT("Open") ) , wxEmptyString, wxITEM_NORMAL );
 	#ifdef __WXMSW__
-	open->SetBitmaps( books_png_to_wx_bitmap() );
+	m_menu_archive_open->SetBitmaps( books_png_to_wx_bitmap() );
 	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
-	open->SetBitmap( books_png_to_wx_bitmap() );
+	m_menu_archive_open->SetBitmap( books_png_to_wx_bitmap() );
 	#endif
-	archive->Append( open );
+	m_menu_archive->Append( m_menu_archive_open );
 
-	wxMenuItem* save;
-	save = new wxMenuItem( archive, ID_SAVE, wxString( wxT("Save") ) , wxEmptyString, wxITEM_NORMAL );
+	wxMenuItem* m_menu_archive_save;
+	m_menu_archive_save = new wxMenuItem( m_menu_archive, ID_MENU_ARCHIVE_SAVE, wxString( wxT("Save") ) , wxEmptyString, wxITEM_NORMAL );
 	#ifdef __WXMSW__
-	save->SetBitmaps( download_png_to_wx_bitmap() );
+	m_menu_archive_save->SetBitmaps( download_png_to_wx_bitmap() );
 	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
-	save->SetBitmap( download_png_to_wx_bitmap() );
+	m_menu_archive_save->SetBitmap( download_png_to_wx_bitmap() );
 	#endif
-	archive->Append( save );
+	m_menu_archive->Append( m_menu_archive_save );
 
-	wxMenuItem* close;
-	close = new wxMenuItem( archive, ID_CLOSE, wxString( wxT("Close") ) , wxEmptyString, wxITEM_NORMAL );
+	wxMenuItem* m_menu_archive_close;
+	m_menu_archive_close = new wxMenuItem( m_menu_archive, ID_MENU_ARCHIVE_CLOSE, wxString( wxT("Close") ) , wxEmptyString, wxITEM_NORMAL );
 	#ifdef __WXMSW__
-	close->SetBitmaps( cross_mark_png_to_wx_bitmap() );
+	m_menu_archive_close->SetBitmaps( cross_mark_png_to_wx_bitmap() );
 	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
-	close->SetBitmap( cross_mark_png_to_wx_bitmap() );
+	m_menu_archive_close->SetBitmap( cross_mark_png_to_wx_bitmap() );
 	#endif
-	archive->Append( close );
+	m_menu_archive->Append( m_menu_archive_close );
 
-	m_menubar->Append( archive, wxT("Archive") );
+	m_menubar->Append( m_menu_archive, wxT("Archive") );
 
-	file = new wxMenu();
-	wxMenuItem* FileExtract;
-	FileExtract = new wxMenuItem( file, wxID_ANY, wxString( wxT("Extract") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu_file = new wxMenu();
+	wxMenuItem* m_menu_file_extract;
+	m_menu_file_extract = new wxMenuItem( m_menu_file, ID_MENU_FILE_EXTRACT, wxString( wxT("Extract") ) , wxEmptyString, wxITEM_NORMAL );
 	#ifdef __WXMSW__
-	FileExtract->SetBitmaps( inbox_png_to_wx_bitmap() );
+	m_menu_file_extract->SetBitmaps( inbox_png_to_wx_bitmap() );
 	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
-	FileExtract->SetBitmap( inbox_png_to_wx_bitmap() );
+	m_menu_file_extract->SetBitmap( inbox_png_to_wx_bitmap() );
 	#endif
-	file->Append( FileExtract );
+	m_menu_file->Append( m_menu_file_extract );
 
-	m_menubar->Append( file, wxT("File") );
+	wxMenuItem* m_menu_file_newFile;
+	m_menu_file_newFile = new wxMenuItem( m_menu_file, ID_NEW_FILE, wxString( wxT("New file") ) , wxEmptyString, wxITEM_NORMAL );
+	#ifdef __WXMSW__
+	m_menu_file_newFile->SetBitmaps( file_png_to_wx_bitmap() );
+	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
+	m_menu_file_newFile->SetBitmap( file_png_to_wx_bitmap() );
+	#endif
+	m_menu_file->Append( m_menu_file_newFile );
 
-	help = new wxMenu();
-	wxMenuItem* loadedPlugins;
-	loadedPlugins = new wxMenuItem( help, ID_LOADED_PLUGINS, wxString( wxT("Loaded plugins") ) , wxEmptyString, wxITEM_NORMAL );
-	help->Append( loadedPlugins );
+	wxMenuItem* m_menu_file_newDirectory;
+	m_menu_file_newDirectory = new wxMenuItem( m_menu_file, ID_NEW_DIRECTORY, wxString( wxT("New directory") ) , wxEmptyString, wxITEM_NORMAL );
+	#ifdef __WXMSW__
+	m_menu_file_newDirectory->SetBitmaps( open_folder_png_to_wx_bitmap() );
+	#elif (defined( __WXGTK__ ) || defined( __WXOSX__ ))
+	m_menu_file_newDirectory->SetBitmap( open_folder_png_to_wx_bitmap() );
+	#endif
+	m_menu_file->Append( m_menu_file_newDirectory );
 
-	wxMenuItem* about;
-	about = new wxMenuItem( help, ID_ABOUT, wxString( wxT("About") ) , wxEmptyString, wxITEM_NORMAL );
-	help->Append( about );
+	m_menubar->Append( m_menu_file, wxT("File") );
 
-	m_menubar->Append( help, wxT("Help") );
+	m_menu_help = new wxMenu();
+	wxMenuItem* m_menu_help_loadedPlugins;
+	m_menu_help_loadedPlugins = new wxMenuItem( m_menu_help, ID_LOADED_PLUGINS, wxString( wxT("Loaded plugins") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu_help->Append( m_menu_help_loadedPlugins );
+
+	wxMenuItem* m_menu_help_about;
+	m_menu_help_about = new wxMenuItem( m_menu_help, ID_ABOUT, wxString( wxT("About") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu_help->Append( m_menu_help_about );
+
+	m_menubar->Append( m_menu_help, wxT("Help") );
 
 	this->SetMenuBar( m_menubar );
 
 	wxBoxSizer* bMainSizer;
-	bMainSizer = new wxBoxSizer( wxVERTICAL );
+	bMainSizer = new wxBoxSizer( wxHORIZONTAL );
 
-	m_listCtrl_archiveData = new wxListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_ICON );
+	m_treeCtrl_archiveData = new wxTreeCtrl( this, wxID_ANY, wxDefaultPosition, wxSize( 200,-1 ), wxTR_DEFAULT_STYLE|wxBORDER_NONE|wxHSCROLL|wxVSCROLL );
+	bMainSizer->Add( m_treeCtrl_archiveData, 0, wxALL|wxEXPAND, 5 );
+
+	m_listCtrl_archiveData = new wxListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT );
 	bMainSizer->Add( m_listCtrl_archiveData, 1, wxEXPAND, 5 );
 
 
@@ -113,12 +136,13 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	m_bpButton_ArchiveSave->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveSave ), NULL, this );
 	m_bpButton_ArchiveClose->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveClose ), NULL, this );
 	m_bpButton_FileExtract->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::FileExtract ), NULL, this );
-	archive->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::ArchiveOpen ), this, open->GetId());
-	archive->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::ArchiveSave ), this, save->GetId());
-	archive->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::ArchiveClose ), this, close->GetId());
-	file->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::FileExtract ), this, FileExtract->GetId());
-	help->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::HelpLoadedPlugings ), this, loadedPlugins->GetId());
-	help->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::HelpAbout ), this, about->GetId());
+	m_menu_archive->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::ArchiveOpen ), this, m_menu_archive_open->GetId());
+	m_menu_archive->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::ArchiveSave ), this, m_menu_archive_save->GetId());
+	m_menu_archive->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::ArchiveClose ), this, m_menu_archive_close->GetId());
+	m_menu_file->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::FileExtract ), this, m_menu_file_extract->GetId());
+	m_menu_help->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::HelpLoadedPlugings ), this, m_menu_help_loadedPlugins->GetId());
+	m_menu_help->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::HelpAbout ), this, m_menu_help_about->GetId());
+	m_treeCtrl_archiveData->Connect( wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler( MainFrame::TreeSelectedNewItem ), NULL, this );
 }
 
 MainFrame::~MainFrame()
@@ -128,6 +152,7 @@ MainFrame::~MainFrame()
 	m_bpButton_ArchiveSave->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveSave ), NULL, this );
 	m_bpButton_ArchiveClose->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveClose ), NULL, this );
 	m_bpButton_FileExtract->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::FileExtract ), NULL, this );
+	m_treeCtrl_archiveData->Disconnect( wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler( MainFrame::TreeSelectedNewItem ), NULL, this );
 
 }
 
@@ -155,5 +180,37 @@ PluginListDialog::~PluginListDialog()
 {
 	// Disconnect Events
 	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( PluginListDialog::DialogClose ) );
+
+}
+
+AboutDialog::AboutDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* bSizer3;
+	bSizer3 = new wxBoxSizer( wxVERTICAL );
+
+	m_staticText1 = new wxStaticText( this, wxID_ANY, wxT("FlexArch"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
+	m_staticText1->Wrap( -1 );
+	bSizer3->Add( m_staticText1, 0, wxALL|wxEXPAND, 5 );
+
+	m_staticText2 = new wxStaticText( this, wxID_ANY, wxT("MyLabel"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
+	m_staticText2->Wrap( -1 );
+	bSizer3->Add( m_staticText2, 0, wxALL|wxEXPAND, 5 );
+
+
+	this->SetSizer( bSizer3 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+
+	// Connect Events
+	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( AboutDialog::DialogClose ) );
+}
+
+AboutDialog::~AboutDialog()
+{
+	// Disconnect Events
+	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( AboutDialog::DialogClose ) );
 
 }
