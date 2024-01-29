@@ -78,6 +78,7 @@ class MainFrame : public wxFrame
 		virtual void HelpLoadedPlugings( wxCommandEvent& event ) { event.Skip(); }
 		virtual void HelpAbout( wxCommandEvent& event ) { event.Skip(); }
 		virtual void TreeSelectedNewItem( wxTreeEvent& event ) { event.Skip(); }
+		virtual void FileListColumnClicked( wxListEvent& event ) { event.Skip(); }
 		virtual void FileListItemActivated( wxListEvent& event ) { event.Skip(); }
 
 

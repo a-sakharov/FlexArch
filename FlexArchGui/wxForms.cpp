@@ -152,6 +152,7 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	m_menu_help->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::HelpLoadedPlugings ), this, m_menu_help_loadedPlugins->GetId());
 	m_menu_help->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::HelpAbout ), this, m_menu_help_about->GetId());
 	m_treeCtrl_archiveData->Connect( wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler( MainFrame::TreeSelectedNewItem ), NULL, this );
+	m_listCtrl_archiveData->Connect( wxEVT_COMMAND_LIST_COL_CLICK, wxListEventHandler( MainFrame::FileListColumnClicked ), NULL, this );
 	m_listCtrl_archiveData->Connect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( MainFrame::FileListItemActivated ), NULL, this );
 }
 
@@ -164,6 +165,7 @@ MainFrame::~MainFrame()
 	m_bpButton_ArchiveClose->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveClose ), NULL, this );
 	m_bpButton_FileExtract->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::FileExtract ), NULL, this );
 	m_treeCtrl_archiveData->Disconnect( wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler( MainFrame::TreeSelectedNewItem ), NULL, this );
+	m_listCtrl_archiveData->Disconnect( wxEVT_COMMAND_LIST_COL_CLICK, wxListEventHandler( MainFrame::FileListColumnClicked ), NULL, this );
 	m_listCtrl_archiveData->Disconnect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( MainFrame::FileListItemActivated ), NULL, this );
 
 }

@@ -36,6 +36,9 @@
 
 #endif
 
+#ifndef _WIN32
+#define _stricmp(a, b) strcasecmp(a, b)
+#endif
 
 class MyApp : public wxApp
 {
@@ -181,11 +184,19 @@ public:
 class MainFrameImplementation : public MainFrame
 {
 private:
+    enum columns
+    {
+        COLUMN_NAME = 0,
+        COLUMN_SIZE = 1,
+        COLUMN_MOD_DATE = 2,
+    };
+
     opened_archive m_archive;
     bool m_archive_opened;
     ArchiveContents *m_archive_data;
     bool m_human_readable_size;
-
+    enum columns m_sort_by;
+    bool m_sort_direction_asc;
 
 
     //helpers
@@ -284,11 +295,21 @@ private:
 
     void ListViewSort()
     {
+        struct sort_info_temp_t
+        {
+            int sort_by;
+            bool sort_direction_asc;
+        }sort_info_temp = { m_sort_by , m_sort_direction_asc };
+
+        //m_listCtrl_archiveData->RemoveSortIndicator();
+        m_listCtrl_archiveData->ShowSortIndicator(m_sort_by, m_sort_direction_asc);
+
         m_listCtrl_archiveData->SortItems(
-            [](wxIntPtr item1, wxIntPtr item2, wxIntPtr sortData) -> int 
+            [](wxIntPtr item1, wxIntPtr item2, wxIntPtr sortData) -> int
             { 
                 ArchiveContents* a = (ArchiveContents*)item1;
                 ArchiveContents* b = (ArchiveContents*)item2;
+                sort_info_temp_t* sort_type = (sort_info_temp_t*)sortData;
 
                 //special cases
                 if (!a || !b) return 0;
@@ -299,11 +320,29 @@ private:
                 if ((a->flags & FA_ENTRY_IS_DIRECTORY) == (b->flags & FA_ENTRY_IS_DIRECTORY))
                 {
                     //actual sort compare
-                    return strcmp(a->name, b->name);
+                    int r;
+                    switch (sort_type->sort_by)
+                    {
+                    case COLUMN_NAME:
+                        r = _stricmp(a->name, b->name);
+                        break;
+
+                    case COLUMN_SIZE:
+                        r = a->size - b->size;
+                        break;
+
+                    case COLUMN_MOD_DATE:
+                        r = a->modification_date - b->modification_date;
+                        break;
+
+                    default:
+                        r = 0;
+                    }
+                    return sort_type->sort_direction_asc ? r : -r;
                 }
                 if (a->flags & FA_ENTRY_IS_DIRECTORY) return -1;
                 return 1;
-            }, NULL);
+            }, (wxIntPtr)&sort_info_temp);
     }
 
     void ListViewUpdate()
@@ -358,16 +397,16 @@ private:
             }
 
             m_listCtrl_archiveData->InsertItem(i, "");
-            m_listCtrl_archiveData->SetItem(i, 0, item->children[i]->name, (item->children[i]->flags & FA_ENTRY_IS_DIRECTORY) ? 1 : 0);
-            m_listCtrl_archiveData->SetItem(i, 1, size_buf);
-            m_listCtrl_archiveData->SetItem(i, 2, time_buf);
+            m_listCtrl_archiveData->SetItem(i, COLUMN_NAME, item->children[i]->name, (item->children[i]->flags & FA_ENTRY_IS_DIRECTORY) ? 1 : 0);
+            m_listCtrl_archiveData->SetItem(i, COLUMN_SIZE, size_buf);
+            m_listCtrl_archiveData->SetItem(i, COLUMN_MOD_DATE, time_buf);
             m_listCtrl_archiveData->SetItemPtrData(i, (wxUIntPtr)item->children[i]);
         }
 
         if (item->parent)
         {
             m_listCtrl_archiveData->InsertItem(i, "");
-            m_listCtrl_archiveData->SetItem(i, 0, "..", (FA_ENTRY_IS_DIRECTORY & FA_ENTRY_IS_DIRECTORY) ? 1 : 0);
+            m_listCtrl_archiveData->SetItem(i, COLUMN_NAME, "..", (FA_ENTRY_IS_DIRECTORY & FA_ENTRY_IS_DIRECTORY) ? 1 : 0);
             m_listCtrl_archiveData->SetItemPtrData(i, (wxUIntPtr)item->parent);
         }
 
@@ -400,6 +439,21 @@ private:
         }
 
         event.Skip();
+    }
+
+    void FileListColumnClicked(wxListEvent& event)
+    { 
+        if (event.GetColumn() == m_sort_by)
+        {
+            m_sort_direction_asc = !m_sort_direction_asc;
+        }
+        else
+        {
+            m_sort_by = (columns)event.GetColumn();
+        }
+
+        ListViewSort();
+        event.Skip(); 
     }
 
     //menus
@@ -524,6 +578,9 @@ public:
 
         m_human_readable_size = false;
         m_archive_opened = false;
+
+        m_sort_by = COLUMN_NAME;
+        m_sort_direction_asc = true;
     }
 
     ~MainFrameImplementation()
