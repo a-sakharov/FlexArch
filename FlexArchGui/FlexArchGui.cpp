@@ -3,12 +3,14 @@
 #include <wx/wx.h>
 #endif
 #include <wx/listctrl.h>
-#include <stdio.h>
+#include <cstdio>
+#include <cinttypes>
 #include <FlexArchBase/plugin.h>
 #include <FlexArchBase/FlexArchInternals.h>
 #include "wxForms.h"
 #include <algorithm>
 #include <vector>
+#include <iomanip>
 
 #ifdef _WIN32
 
@@ -46,7 +48,7 @@ wxIMPLEMENT_APP(MyApp);
 class ArchiveContents : public wxTreeItemData
 {
 private:
-    void SetValues(uint64_t id, const char* name, uint64_t flags, uint64_t size, uint64_t size_in_archive, time_t creation_date, time_t modification_date)
+    void SetValues(uint64_t id, const char* name, uint64_t flags, uint64_t size, uint64_t size_in_archive, time_t creation_date, time_t modification_date, ArchiveContents* parent, wxTreeItemId * associated_tree_item = NULL)
     {
         this->id = id;
         this->name = wxString::FromUTF8(name);
@@ -55,6 +57,8 @@ private:
         this->size_in_archive = size_in_archive;
         this->creation_date = creation_date;
         this->modification_date = modification_date;
+        this->parent = parent;
+        this->associated_tree_item = associated_tree_item;
     }
 
 public:
@@ -66,31 +70,34 @@ public:
     time_t creation_date;    
     time_t modification_date;
 
+    wxTreeItemId associated_tree_item;
+
     wxVector<ArchiveContents*> children;
+    ArchiveContents* parent;
 
     bool sorted;
 
-    ArchiveContents(uint64_t id, const char *name, uint64_t flags, uint64_t size, uint64_t size_in_archive, time_t creation_date, time_t modification_date)
+    ArchiveContents(uint64_t id, const char *name, uint64_t flags, uint64_t size, uint64_t size_in_archive, time_t creation_date, time_t modification_date, ArchiveContents* parent)
     {
-        SetValues(id, name, flags, size, size_in_archive, creation_date, modification_date);
+        SetValues(id, name, flags, size, size_in_archive, creation_date, modification_date, parent);
 
         sorted = false;
     }
 
     ArchiveContents() : 
-        ArchiveContents(0, "", 0, 0, 0, 0, 0)
+        ArchiveContents(0, "", 0, 0, 0, 0, 0, 0)
     {
         ;
     }
 
     ArchiveContents(const ArchiveContents &orig) :
-        ArchiveContents(orig.id, orig.name, orig.flags, orig.size, orig.size_in_archive, orig.creation_date, orig.modification_date)
+        ArchiveContents(orig.id, orig.name, orig.flags, orig.size, orig.size_in_archive, orig.creation_date, orig.modification_date, orig.parent)
     {
         ;
     }
 
-    ArchiveContents(archive_entry* entry) :
-        ArchiveContents(entry->id, entry->super_name ? entry->super_name : entry->name, entry->flags, entry->size, entry->size_in_archive, entry->creation_date, entry->modification_date) 
+    ArchiveContents(archive_entry* entry, ArchiveContents* parent) :
+        ArchiveContents(entry->id, entry->super_name ? entry->super_name : entry->name, entry->flags, entry->size, entry->size_in_archive, entry->creation_date, entry->modification_date, parent)
     {
         ;
     }
@@ -104,7 +111,7 @@ public:
     {
         if (this != &other) // not a self-assignment
         {         
-            SetValues(other.id, other.name, other.flags, other.size, other.size_in_archive, other.creation_date, other.modification_date);
+            SetValues(other.id, other.name, other.flags, other.size, other.size_in_archive, other.creation_date, other.modification_date, other.parent);
         }
         return *this;
     }
@@ -175,10 +182,13 @@ class MainFrameImplementation : public MainFrame
 {
 private:
     opened_archive m_archive;
-    wxString m_archive_name;
     bool m_archive_opened;
     ArchiveContents *m_archive_data;
+    bool m_human_readable_size;
 
+
+
+    //helpers
     void UpdateGuiForArchiveState()
     {
         if (m_archive_opened)
@@ -209,26 +219,15 @@ private:
         }
 
         ArchiveContents* result = NULL;
-#if 1
-        std::for_each(tree->children.begin(), tree->children.end(), [&result, target_id](ArchiveContents *child) {
-                result = FindItemInTree(child, target_id);
-                if (result)
-                {
-                    return result;
-                }
-            });
-#else
-        for (ArchiveContents child: tree->children)
+
+        for (auto i = tree->children.begin(); i < tree->children.end(); ++i)
         {
-            result = FindItemInTree(&child, target_id);
-            if (result)
+            if (result = FindItemInTree(*i, target_id))
             {
                 return result;
             }
         }
-#endif
-
-        return result;
+        return NULL;
     }
 
     static void FLEXARCH_CALL_TYPE archive_enumerate(archive_handle archive, void* context, archive_entry* entry, uint8_t last_item)
@@ -239,7 +238,7 @@ private:
         parent = FindItemInTree(tree, entry->parent);
         assert(parent != NULL);
 
-        parent->children.push_back(new ArchiveContents(entry));
+        parent->children.push_back(new ArchiveContents(entry, parent));
     }
 
     void ViewArchiveFiles()
@@ -264,13 +263,16 @@ private:
             new_id = m_treeCtrl_archiveData->AppendItem(tree_parent, archive_parent->name, -1, -1, archive_parent);
         }
 
+        archive_parent->associated_tree_item = new_id;
+
         if (!archive_parent->sorted)
         {
-            std::sort(archive_parent->children.begin(), archive_parent->children.end(), [](ArchiveContents* a, ArchiveContents* b) { 
-                
-                if ((a->flags & FA_ENTRY_IS_DIRECTORY) == (b->flags & FA_ENTRY_IS_DIRECTORY)) return a->name < b->name;
-                if (a->flags & FA_ENTRY_IS_DIRECTORY) return true;
-                return false;
+            std::sort(archive_parent->children.begin(), archive_parent->children.end(), 
+                [](ArchiveContents* a, ArchiveContents* b) -> bool
+                {
+                    if ((a->flags & FA_ENTRY_IS_DIRECTORY) == (b->flags & FA_ENTRY_IS_DIRECTORY)) return a->name < b->name;
+                    if (a->flags & FA_ENTRY_IS_DIRECTORY) return true;
+                    return false;
                 });
             archive_parent->sorted = true;
         }
@@ -280,6 +282,128 @@ private:
             });
     }
 
+    void ListViewSort()
+    {
+        m_listCtrl_archiveData->SortItems(
+            [](wxIntPtr item1, wxIntPtr item2, wxIntPtr sortData) -> int 
+            { 
+                ArchiveContents* a = (ArchiveContents*)item1;
+                ArchiveContents* b = (ArchiveContents*)item2;
+
+                //special cases
+                if (!a || !b) return 0;
+                if ((b->parent && b->parent->parent) && (a->id == b->parent->parent->id)) return -1;
+                if ((a->parent->parent) && (b->id == a->parent->parent->id)) return 1;
+
+                //directories first always
+                if ((a->flags & FA_ENTRY_IS_DIRECTORY) == (b->flags & FA_ENTRY_IS_DIRECTORY))
+                {
+                    //actual sort compare
+                    return strcmp(a->name, b->name);
+                }
+                if (a->flags & FA_ENTRY_IS_DIRECTORY) return -1;
+                return 1;
+            }, NULL);
+    }
+
+    void ListViewUpdate()
+    {
+        if (!m_archive_opened)
+        {
+            return;
+        }
+
+        ArchiveContents* item = (ArchiveContents*)m_treeCtrl_archiveData->GetItemData(m_treeCtrl_archiveData->GetSelection());
+
+        if ((item->flags & FA_ENTRY_IS_DIRECTORY) == 0)
+        {
+            item = item->parent;
+        }
+
+        m_listCtrl_archiveData->ClearAll();
+
+        m_listCtrl_archiveData->AppendColumn("Name", wxLIST_FORMAT_LEFT, 200);
+        m_listCtrl_archiveData->AppendColumn("Size", wxLIST_FORMAT_RIGHT, 80);
+        m_listCtrl_archiveData->AppendColumn("Modified", wxLIST_FORMAT_LEFT, 120);
+        int i;
+        for (i = 0; i < item->children.size(); ++i)
+        {
+            char time_buf[128];
+            std::tm* tm = std::localtime(&item->modification_date);
+            strftime(time_buf, sizeof(time_buf), "%F %T", tm);
+
+            char size_buf[128];
+            if (m_human_readable_size)
+            {
+                FlexArch_FormatSizeHumanly(size_buf, sizeof(size_buf), item->children[i]->size);
+            }
+            else
+            {
+                uint64_t size_temp = item->children[i]->size;
+                std::string size_str_temp;
+
+                do
+                {
+                    snprintf(size_buf, sizeof(size_buf), "%.3" PRIu64 " ", size_temp % 1000);
+                    size_temp /= 1000;
+                    size_str_temp = size_buf + size_str_temp;
+                } while (size_temp);
+
+                if (size_str_temp[size_str_temp.length() - 1] == ' ')
+                {
+                    size_str_temp = size_str_temp.substr(0, size_str_temp.length() - 1);
+                }
+                while (size_str_temp.length() > 1 && size_str_temp[0] == '0') size_str_temp = size_str_temp.substr(1, size_str_temp.length() - 1);
+                strncpy(size_buf, size_str_temp.c_str(), sizeof(size_buf));
+            }
+
+            m_listCtrl_archiveData->InsertItem(i, "");
+            m_listCtrl_archiveData->SetItem(i, 0, item->children[i]->name, (item->children[i]->flags & FA_ENTRY_IS_DIRECTORY) ? 1 : 0);
+            m_listCtrl_archiveData->SetItem(i, 1, size_buf);
+            m_listCtrl_archiveData->SetItem(i, 2, time_buf);
+            m_listCtrl_archiveData->SetItemPtrData(i, (wxUIntPtr)item->children[i]);
+        }
+
+        if (item->parent)
+        {
+            m_listCtrl_archiveData->InsertItem(i, "");
+            m_listCtrl_archiveData->SetItem(i, 0, "..", (FA_ENTRY_IS_DIRECTORY & FA_ENTRY_IS_DIRECTORY) ? 1 : 0);
+            m_listCtrl_archiveData->SetItemPtrData(i, (wxUIntPtr)item->parent);
+        }
+
+        ListViewSort();
+    }
+
+    //different events
+    void FrameClose(wxCloseEvent& event)
+    {
+        wxCommandEvent dummy;
+        ArchiveClose((wxCommandEvent&)dummy);
+        if (!dummy.GetSkipped())
+        {
+            event.Skip();
+        }
+    }
+
+    void TreeSelectedNewItem(wxTreeEvent& event)
+    {
+        ListViewUpdate();
+    }
+
+    void FileListItemActivated(wxListEvent& event)
+    {
+        ArchiveContents* item_activated = (ArchiveContents*)event.GetItem().GetData();
+
+        if (item_activated && item_activated->flags & FA_ENTRY_IS_DIRECTORY)
+        {
+            m_treeCtrl_archiveData->SelectItem(item_activated->associated_tree_item, true);
+        }
+
+        event.Skip();
+    }
+
+    //menus
+    ///archive
     void ArchiveOpen(wxCommandEvent& event)
     {
         if (m_archive_opened)
@@ -306,8 +430,7 @@ private:
             return;
         }
 
-        m_archive_name = wxFileName(openFileDialog.GetPath()).GetFullName();
-        m_archive_data = new ArchiveContents(0, m_archive_name, 0, 0, 0, 0, 0);
+        m_archive_data = new ArchiveContents(0, wxFileName(openFileDialog.GetPath()).GetFullName(), FA_ENTRY_IS_DIRECTORY, 0, 0, 0, 0, 0);
         m_archive.used_plugin.Archive_EnumerateEntries(m_archive.handle, (void*)m_archive_data, archive_enumerate);
 
         m_archive_opened = true;
@@ -317,7 +440,11 @@ private:
 
     void ArchiveSave(wxCommandEvent& event)
     {
-        event.Skip();
+        if (!m_archive_opened)
+        {
+            event.Skip();
+        }
+        m_archive.used_plugin.Archive_Save(m_archive.handle);
     }
 
     void ArchiveClose(wxCommandEvent& event)
@@ -329,24 +456,39 @@ private:
 
         if (m_archive.have_unsaved_changes)
         {
-            //ask if changes should be saved
-            //save changes if should
+            int user_chouce = wxMessageBox("Archive have unsaved changes\nSave changes?", "Caution", wxYES_NO | wxID_CANCEL);
+            if (user_chouce == wxID_CANCEL)
+            {
+                event.Skip();
+                return;
+            }
+
+            if (user_chouce == wxYES)
+            {
+                m_archive.used_plugin.Archive_Save(m_archive.handle);
+            }
         }
 
         m_archive.used_plugin.Archive_Close(m_archive.handle);
-        m_archive_name = "";
         m_archive_opened = false;
         UpdateGuiForArchiveState();
 
         m_treeCtrl_archiveData->DeleteAllItems();
         m_listCtrl_archiveData->DeleteAllItems();
     }
-
+    ///file
     void FileExtract(wxCommandEvent& event)
     {
         event.Skip();
     }
-
+    ///view
+    void ViewToggleHumanReadableSize(wxCommandEvent& event)
+    {
+        m_human_readable_size = m_menu_view->IsChecked(ID_HUMANREADABLE_SIZE);
+        ListViewUpdate();
+        event.Skip();
+    }
+    ///Help
     void HelpLoadedPlugings(wxCommandEvent& event)
     {
         PluginListDialogImplementation* pl = new PluginListDialogImplementation(this);
@@ -361,38 +503,27 @@ private:
         ab->Show();
     }
 
-    void TreeSelectedNewItem(wxTreeEvent& event) 
-    { 
-        ArchiveContents* item = (ArchiveContents * )m_treeCtrl_archiveData->GetItemData(event.GetItem());
-        
-        m_listCtrl_archiveData->ClearAll();
-
-        m_listCtrl_archiveData->AppendColumn("");
-        m_listCtrl_archiveData->AppendColumn("Name");
-        m_listCtrl_archiveData->AppendColumn("Size");
-        
-        wxImageList *images = new wxImageList(32, 32, true, 2);
-        
-        images->Add(m_menu_file->GetMenuItems()[1]->GetBitmap());
-        images->Add(m_menu_file->GetMenuItems()[2]->GetBitmap());
-
-        m_listCtrl_archiveData->AssignImageList(images, wxIMAGE_LIST_SMALL);
-        
-        for (int i = 0; i < item->children.size(); ++i)
-        {
-            m_listCtrl_archiveData->InsertItem(i, "");
-            m_listCtrl_archiveData->SetItem(i, 0, "", item->children[i]->flags & FA_ENTRY_IS_DIRECTORY ? 1 : 0);
-            m_listCtrl_archiveData->SetItem(i, 1, item->children[i]->name);
-            m_listCtrl_archiveData->SetItem(i, 2, std::to_string(item->children[i]->size));
-        }
-
-    }
-
 public:
     MainFrameImplementation(wxWindow* parent) : MainFrame(parent)
     {
         m_archive_opened = false;
         UpdateGuiForArchiveState();
+
+        wxImageList* images = new wxImageList(16, 16, true, 2);
+
+        wxBitmap file_bmp = m_menu_file->GetMenuItems()[1]->GetBitmap();   //fixme
+        wxBitmap folder_bmp = m_menu_file->GetMenuItems()[2]->GetBitmap(); //fixme
+
+        wxBitmap::Rescale(folder_bmp, wxSize(16, 16));
+        wxBitmap::Rescale(file_bmp, wxSize(16, 16));
+
+        images->Add(file_bmp);
+        images->Add(folder_bmp);
+
+        m_listCtrl_archiveData->AssignImageList(images, wxIMAGE_LIST_SMALL);
+
+        m_human_readable_size = false;
+        m_archive_opened = false;
     }
 
     ~MainFrameImplementation()

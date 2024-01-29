@@ -103,6 +103,13 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 
 	m_menubar->Append( m_menu_file, wxT("File") );
 
+	m_menu_view = new wxMenu();
+	wxMenuItem* m_menu_human_readable_size;
+	m_menu_human_readable_size = new wxMenuItem( m_menu_view, ID_HUMANREADABLE_SIZE, wxString( wxT("Human-readable size") ) , wxEmptyString, wxITEM_CHECK );
+	m_menu_view->Append( m_menu_human_readable_size );
+
+	m_menubar->Append( m_menu_view, wxT("View") );
+
 	m_menu_help = new wxMenu();
 	wxMenuItem* m_menu_help_loadedPlugins;
 	m_menu_help_loadedPlugins = new wxMenuItem( m_menu_help, ID_LOADED_PLUGINS, wxString( wxT("Loaded plugins") ) , wxEmptyString, wxITEM_NORMAL );
@@ -132,6 +139,7 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	this->Centre( wxBOTH );
 
 	// Connect Events
+	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( MainFrame::FrameClose ) );
 	m_bpButton_ArchiveOpen->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveOpen ), NULL, this );
 	m_bpButton_ArchiveSave->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveSave ), NULL, this );
 	m_bpButton_ArchiveClose->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveClose ), NULL, this );
@@ -140,19 +148,23 @@ MainFrame::MainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	m_menu_archive->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::ArchiveSave ), this, m_menu_archive_save->GetId());
 	m_menu_archive->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::ArchiveClose ), this, m_menu_archive_close->GetId());
 	m_menu_file->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::FileExtract ), this, m_menu_file_extract->GetId());
+	m_menu_view->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::ViewToggleHumanReadableSize ), this, m_menu_human_readable_size->GetId());
 	m_menu_help->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::HelpLoadedPlugings ), this, m_menu_help_loadedPlugins->GetId());
 	m_menu_help->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrame::HelpAbout ), this, m_menu_help_about->GetId());
 	m_treeCtrl_archiveData->Connect( wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler( MainFrame::TreeSelectedNewItem ), NULL, this );
+	m_listCtrl_archiveData->Connect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( MainFrame::FileListItemActivated ), NULL, this );
 }
 
 MainFrame::~MainFrame()
 {
 	// Disconnect Events
+	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( MainFrame::FrameClose ) );
 	m_bpButton_ArchiveOpen->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveOpen ), NULL, this );
 	m_bpButton_ArchiveSave->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveSave ), NULL, this );
 	m_bpButton_ArchiveClose->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::ArchiveClose ), NULL, this );
 	m_bpButton_FileExtract->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MainFrame::FileExtract ), NULL, this );
 	m_treeCtrl_archiveData->Disconnect( wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler( MainFrame::TreeSelectedNewItem ), NULL, this );
+	m_listCtrl_archiveData->Disconnect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( MainFrame::FileListItemActivated ), NULL, this );
 
 }
 

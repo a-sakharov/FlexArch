@@ -48,6 +48,7 @@ class MainFrame : public wxFrame
 			ID_MENU_FILE_EXTRACT,
 			ID_NEW_FILE,
 			ID_NEW_DIRECTORY,
+			ID_HUMANREADABLE_SIZE,
 			ID_LOADED_PLUGINS,
 			ID_ABOUT
 		};
@@ -62,18 +63,22 @@ class MainFrame : public wxFrame
 		wxMenuBar* m_menubar;
 		wxMenu* m_menu_archive;
 		wxMenu* m_menu_file;
+		wxMenu* m_menu_view;
 		wxMenu* m_menu_help;
 		wxTreeCtrl* m_treeCtrl_archiveData;
 		wxListCtrl* m_listCtrl_archiveData;
 
 		// Virtual event handlers, override them in your derived class
+		virtual void FrameClose( wxCloseEvent& event ) { event.Skip(); }
 		virtual void ArchiveOpen( wxCommandEvent& event ) { event.Skip(); }
 		virtual void ArchiveSave( wxCommandEvent& event ) { event.Skip(); }
 		virtual void ArchiveClose( wxCommandEvent& event ) { event.Skip(); }
 		virtual void FileExtract( wxCommandEvent& event ) { event.Skip(); }
+		virtual void ViewToggleHumanReadableSize( wxCommandEvent& event ) { event.Skip(); }
 		virtual void HelpLoadedPlugings( wxCommandEvent& event ) { event.Skip(); }
 		virtual void HelpAbout( wxCommandEvent& event ) { event.Skip(); }
 		virtual void TreeSelectedNewItem( wxTreeEvent& event ) { event.Skip(); }
+		virtual void FileListItemActivated( wxListEvent& event ) { event.Skip(); }
 
 
 	public:

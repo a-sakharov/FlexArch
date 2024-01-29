@@ -26,9 +26,9 @@ struct PluginFunctionsCollection_t
     Archive_Create                  Archive_Create;
     Archive_Save                    Archive_Save;
     Archive_Close                   Archive_Close;
-    Archive_AddFileLocal            Archive_AddFileLocal;
+    Archive_AddEntry                Archive_AddEntry;
     Archive_RemoveEntry             Archive_RemoveEntry;
-    Archive_CreateDirectory         Archive_CreateDirectory;
+    //Archive_CreateDirectory         Archive_CreateDirectory;
     Archive_EnumerateEntries        Archive_EnumerateEntries;
     Archive_ExtractFiles            Archive_ExtractFiles;
     Archive_RegisterStatusCallback  Archive_RegisterStatusCallback;
@@ -66,7 +66,7 @@ extern "C" {
 
     void FlexArch_CollectPlugins();
     void FlexArch_FreePlugins();
-    bool FlexArch_TryOpenArchive(opened_archive* arch, char* path);
+    bool FlexArch_TryOpenArchive(opened_archive* arch, const char* path);
     const char* FlexArch_GetErrorDescription(FlexArchResult error_code);
     void FlexArch_FormatSizeHumanly(char* str, size_t chars, uint64_t size);
     char* FlexArch_CreateFullPath(opened_archive* arch, archive_entry* entry);

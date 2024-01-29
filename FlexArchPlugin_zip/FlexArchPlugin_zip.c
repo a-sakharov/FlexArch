@@ -2,6 +2,7 @@
 #include <zip.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #if defined(_WIN32) && defined(_DEBUG)
 #include <crtdbg.h>
 #endif
@@ -22,6 +23,8 @@ struct archive_context_t
     //due to libzip and zip itself specific structure we need to separate file file names and folder names
     dirinfo* directories;
     uint64_t directories_count;
+
+    char *archive_path;
 };
 typedef struct archive_context_t *archive_context;
 
@@ -155,7 +158,7 @@ const char* Plugin_ErrorCodeDescription(FlexArchResult error_code, uint16_t rese
     return zip_error_strerror(&err);
 }
 
-FlexArchResult Archive_Open(archive_handle* archive, char* local_path)
+FlexArchResult Archive_Open(archive_handle* archive, const char* local_path)
 {
     archive_context arcontext;
     zip_t* zip;
@@ -186,21 +189,57 @@ FlexArchResult Archive_Open(archive_handle* archive, char* local_path)
         return r;
     }
 
+    arcontext->archive_path = strdup(local_path);
+
     return FA_SUCCESS;
 }
 
 FlexArchResult Archive_Create(archive_handle* archive, char* local_path, char* flags)
 {
     archive_context arcontext = (archive_context)archive;
+    zip_t* zip;
+    FlexArchResult r;
 
-    return FA_NOT_IMPLEMENTID;
+    zip = zip_open(local_path, ZIP_CREATE, NULL);
+    if (!zip)
+    {
+        return FA_CORRUPTED_ARCHIVE;
+    }
+
+    *archive = calloc(1, sizeof(*arcontext));
+    if (!*archive)
+    {
+        zip_close(zip);
+        return FA_SYSTEM_ERROR;
+    }
+
+    arcontext = (archive_context)*archive;
+
+    arcontext->zip_handle = zip;
+
+    r = EnumerateDirectories(arcontext);
+    if (r != FA_SUCCESS)
+    {
+        free(arcontext);
+        zip_close(zip);
+        return r;
+    }
+
+    zip_set_archive_flag(arcontext->zip_handle, ZIP_AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE, 1);
+
+    arcontext->archive_path = strdup(local_path);
+
+    return FA_SUCCESS;
 }
 
 FlexArchResult Archive_Save(archive_handle archive)
 {
     archive_context arcontext = (archive_context)archive;
+    
+    zip_close(arcontext->zip_handle);
+    arcontext->zip_handle = zip_open(arcontext->archive_path, 0, NULL);
 
-    return FA_SUCCESS; //there no special SAVE call for libzip, all work done in Archive_Close
+    return FA_SUCCESS;
 }
 
 FlexArchResult Archive_Close(archive_handle archive)
@@ -214,8 +253,9 @@ FlexArchResult Archive_Close(archive_handle archive)
         free(arcontext->directories[i].name);
     }
 
+    free(arcontext->archive_path);
     free(arcontext->directories);
-    zip_close(arcontext->zip_handle);
+    zip_discard(arcontext->zip_handle);
     free(arcontext);
 
 #if defined(_WIN32) && defined(_DEBUG)
@@ -225,7 +265,7 @@ FlexArchResult Archive_Close(archive_handle archive)
     return FA_SUCCESS;
 }
 
-FlexArchResult Archive_AddFileLocal(archive_handle archive, archive_entry* archive_item, char* local_path)
+FlexArchResult Archive_AddEntry(archive_handle archive, archive_entry* archive_item, char* local_path)
 {
     archive_context arcontext = (archive_context)archive;
 
@@ -238,14 +278,14 @@ FlexArchResult Archive_RemoveEntry(archive_handle archive, archive_entry* archiv
 
     return FA_NOT_IMPLEMENTID;
 }
-
+#if 0
 FlexArchResult Archive_CreateDirectory(archive_handle archive, archive_entry* archive_path)
 {
     archive_context arcontext = (archive_context)archive;
 
     return FA_NOT_IMPLEMENTID;
 }
-
+#endif
 FlexArchResult Archive_EnumerateEntries(archive_handle archive, void *context, archive_enumerate_callback callback)
 {
     archive_context arcontext = (archive_context)archive;

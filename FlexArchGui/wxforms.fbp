@@ -58,6 +58,7 @@
       <property name="window_name"></property>
       <property name="window_style">wxTAB_TRAVERSAL</property>
       <property name="xrc_skip_sizer">1</property>
+      <event name="OnClose">FrameClose</event>
       <object class="wxStatusBar" expanded="false">
         <property name="bg"></property>
         <property name="context_help"></property>
@@ -496,7 +497,7 @@
         <property name="window_extra_style"></property>
         <property name="window_name"></property>
         <property name="window_style"></property>
-        <object class="wxMenu" expanded="false">
+        <object class="wxMenu" expanded="true">
           <property name="label">Archive</property>
           <property name="name">m_menu_archive</property>
           <property name="permission">protected</property>
@@ -561,7 +562,7 @@
             <property name="unchecked_bitmap"></property>
             <event name="OnMenuSelection">FileExtract</event>
           </object>
-          <object class="wxMenuItem" expanded="true">
+          <object class="wxMenuItem" expanded="false">
             <property name="bitmap">Load From Embedded File; res/file.png</property>
             <property name="checked">0</property>
             <property name="enabled">1</property>
@@ -574,7 +575,7 @@
             <property name="shortcut"></property>
             <property name="unchecked_bitmap"></property>
           </object>
-          <object class="wxMenuItem" expanded="true">
+          <object class="wxMenuItem" expanded="false">
             <property name="bitmap">Load From Embedded File; res/open_folder.png</property>
             <property name="checked">0</property>
             <property name="enabled">1</property>
@@ -586,6 +587,25 @@
             <property name="permission">none</property>
             <property name="shortcut"></property>
             <property name="unchecked_bitmap"></property>
+          </object>
+        </object>
+        <object class="wxMenu" expanded="true">
+          <property name="label">View</property>
+          <property name="name">m_menu_view</property>
+          <property name="permission">protected</property>
+          <object class="wxMenuItem" expanded="true">
+            <property name="bitmap"></property>
+            <property name="checked">0</property>
+            <property name="enabled">1</property>
+            <property name="help"></property>
+            <property name="id">ID_HUMANREADABLE_SIZE</property>
+            <property name="kind">wxITEM_CHECK</property>
+            <property name="label">Human-readable size</property>
+            <property name="name">m_menu_human_readable_size</property>
+            <property name="permission">none</property>
+            <property name="shortcut"></property>
+            <property name="unchecked_bitmap"></property>
+            <event name="OnMenuSelection">ViewToggleHumanReadableSize</event>
           </object>
         </object>
         <object class="wxMenu" expanded="false">
@@ -748,6 +768,7 @@
             <property name="window_extra_style"></property>
             <property name="window_name"></property>
             <property name="window_style"></property>
+            <event name="OnListItemActivated">FileListItemActivated</event>
           </object>
         </object>
       </object>

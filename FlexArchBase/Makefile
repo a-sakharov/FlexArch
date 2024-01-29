@@ -1,6 +1,6 @@
 .PHONY: clean all
 
-CFLAGS := -I.. -DFLEXARCH_INTERNAL
+CFLAGS := -I.. -DFLEXARCH_INTERNAL -g
 
 all: FlexArchBase.a
 

@@ -27,9 +27,9 @@ static bool FlexArch_LoadPlugin(PluginFunctionsCollection* plugin, wchar_t* path
     LOADADDR(Archive_Create);
     LOADADDR(Archive_Save);
     LOADADDR(Archive_Close);
-    LOADADDR(Archive_AddFileLocal);
+    LOADADDR(Archive_AddEntry);
     LOADADDR(Archive_RemoveEntry);
-    LOADADDR(Archive_CreateDirectory);
+    //LOADADDR(Archive_CreateDirectory);
     LOADADDR(Archive_EnumerateEntries);
     LOADADDR(Archive_ExtractFiles);
     LOADADDR(Archive_RegisterStatusCallback);
@@ -107,9 +107,9 @@ static bool FlexArch_LoadPlugin(PluginFunctionsCollection* plugin, char* path)
     LOADADDR(Archive_Create);
     LOADADDR(Archive_Save);
     LOADADDR(Archive_Close);
-    LOADADDR(Archive_AddFileLocal);
+    LOADADDR(Archive_AddEntry);
     LOADADDR(Archive_RemoveEntry);
-    LOADADDR(Archive_CreateDirectory);
+    //LOADADDR(Archive_CreateDirectory);
     LOADADDR(Archive_EnumerateEntries);
     LOADADDR(Archive_ExtractFiles);
     LOADADDR(Archive_RegisterStatusCallback);
@@ -196,7 +196,7 @@ void FlexArch_FreePlugins()
     LoadedPluginsCount = 0;
 }
 
-bool FlexArch_TryOpenArchive(opened_archive *arch, char *path)
+bool FlexArch_TryOpenArchive(opened_archive *arch, const char *path)
 {
     size_t i;
 

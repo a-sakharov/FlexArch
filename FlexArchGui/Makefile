@@ -8,7 +8,7 @@ WX_LIBS := $(shell $(WX_CONFIG) --libs)
 
 LDFLAGS :=  -L../FlexArchBase -lFlexArchBase
 
-CXXFLAGS := -I.. -DFLEXARCH_INTERNAL
+CXXFLAGS := -I.. -DFLEXARCH_INTERNAL -g
 
 OBJECTS := FlexArchGui.o wxForms.o
 

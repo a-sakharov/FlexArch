@@ -181,7 +181,7 @@ extern "C" {
     * \param[in] local_path Local file system to archive
     * \return error code
     */
-    FLEXARCH_PLUGIN_API(Archive_Open)(archive_handle* archive, char* local_path);
+    FLEXARCH_PLUGIN_API(Archive_Open)(archive_handle* archive, const char* local_path);
 
     /**
     * \brief Creating new archive
@@ -210,10 +210,10 @@ extern "C" {
     * \brief Adding file from local FS to archive
     * \param[in] archive Archive handle, created by Archive_Open or Archive_Create
     * \param[in] local_path path of local file system file to add
-    * \param[in] archive_item node in archive to be created. Fields `id` and `size_in_archive` is uninitialized before call, field `id` *should* be initialized after call
+    * \param[in] archive_item node in archive to be created. Fields `id`, `flags` and `size_in_archive` is uninitialized before call, field `id` *should* be initialized after call
     * \return error code
     */
-    FLEXARCH_PLUGIN_API(Archive_AddFileLocal)(archive_handle archive, archive_entry* archive_item, char* local_path);
+    FLEXARCH_PLUGIN_API(Archive_AddEntry)(archive_handle archive, archive_entry* archive_item, char* local_path);
 
 
     /**
@@ -224,6 +224,7 @@ extern "C" {
     */
     FLEXARCH_PLUGIN_API(Archive_RemoveEntry)(archive_handle archive, archive_entry* archive_item);
 
+#if 0
     /**
     * \brief
     * \param[in] archive Archive handle, created by Archive_Open or Archive_Create
@@ -231,6 +232,7 @@ extern "C" {
     * \return error code
     */
     FLEXARCH_PLUGIN_API(Archive_CreateDirectory)(archive_handle archive, archive_entry* archive_path);
+#endif
 
     /**
     * \brief
